@@ -5,4 +5,4 @@ project(common C CXX)
 set(CMAKE_CXX_STANDARD 11)
 
 add_library(common STATIC
-		sequencer.h sequencer.cpp)
+		sequencer.h sequencer.cpp tempo.h songposition.h)

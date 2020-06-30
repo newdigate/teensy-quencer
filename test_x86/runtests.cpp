@@ -3,18 +3,23 @@
 #include "SD/SD.h"
 #include <unistd.h>
 #include <dirent.h>
+#include "../common/sequencer.h"
 using namespace std;
 
 void millis_test();
 void delay_test();
+void first_test();
 
 int main(int argc, char **argv){
-	  std::cout << "starting app...\n";
+    std::cout << "starting app...\n";
     initialize_mock_arduino();
-
-    millis_test();
-    delay_test();
+    first_test();
     std::cout << "complete...\n";
+}
+
+void first_test() {
+    tempo tempo(120.0f);
+    sequencer sequencer(tempo);
 }
 
 void millis_test() {
