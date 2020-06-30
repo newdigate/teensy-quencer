@@ -19,7 +19,19 @@ int main(int argc, char **argv){
 
 void first_test() {
     tempo tempo(120.0f);
-    sequencer sequencer(tempo);
+    songposition position;
+    sequencer sequencer(tempo, position);
+
+    sequencer.start();
+    while (true) {
+       sequencer.tick(millis());
+       Serial.printf("%d:%d:%4f\n", position.bar, position.beat, position.sixtyFourth / 64.0f);
+       delay(10);
+    }
+    for (int i=0; i<8; i++) {
+       sequencer.tick(millis());
+       delay(20);
+    }
 }
 
 void millis_test() {

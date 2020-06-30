@@ -7,23 +7,24 @@
 
 #include "tempo.h"
 #include "songposition.h"
+#include "../teensy_cores_x86/mock_arduino.h"
 
 class sequencer {
 public:
-    sequencer(tempo &tempo) : _tempo(tempo) {}
+    sequencer(tempo &tempo, songposition &position) : _tempo(tempo), _position(position) {}
 
     void tick(unsigned long millisecs) {
-        _previousMilliseconds = _milliseconds;
+        if (!_playing) return;
         _milliseconds = millisecs;
 
         unsigned long deltaMillis = _milliseconds - _lastSixtyFourthMillis;
-        if (deltaMillis >= _milliseconds_per_64th) {
+        if (deltaMillis >= _tempo._milliseconds_per_64th) {
             _lastSixtyFourthMillis = millisecs;
 
-            unsigned long deltaSixtyFourths = deltaMillis / _milliseconds_per_64th;
+            unsigned long deltaSixtyFourths = deltaMillis / _tempo._milliseconds_per_64th;
             _position.sixtyFourth += deltaSixtyFourths;
             if (_position.sixtyFourth >= 64) {
-                _position.beat += deltaSixtyFourths / 64;
+                _position.beat += _position.sixtyFourth / 64;
                 _position.sixtyFourth %= 64;
             }
             if (_position.beat >= 4) {
@@ -33,10 +34,19 @@ public:
         }
     }
 
+    void start() {
+        if (!_playing) {
+            _previousMilliseconds = millis();
+            _lastSixtyFourthMillis = _previousMilliseconds;
+            _playing = true;
+        }
+    }
+
 private:
     tempo &_tempo;
-    songposition _position;
-    unsigned long _milliseconds_per_64th = 0;
+    songposition &_position;
+    bool _playing = false;
+
     unsigned long _sixtyFourth = 0;
     unsigned long _lastSixtyFourthMillis = 0;
     unsigned long _milliseconds = 0;
