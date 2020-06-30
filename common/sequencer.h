@@ -27,9 +27,12 @@ public:
                 _position.beat += _position.sixtyFourth / 64;
                 _position.sixtyFourth %= 64;
             }
-            if (_position.beat >= 4) {
+            if (_position.beat > 4) {
                 _position.bar += _position.beat / 4;
                 _position.beat %= 4;
+            }
+            if (_position.bar > _loop_duration_bars) {
+                _position.bar %= _loop_duration_bars;
             }
         }
     }
