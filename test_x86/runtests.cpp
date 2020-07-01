@@ -22,6 +22,7 @@ void first_test() {
     songposition position;
     sequencer sequencer(tempo, position);
     sequencer.onevent = [&] (sequencerevent *event) {
+        Serial.printf("%d:%d:%4f\n", position.bar, position.beat, position.sixtyFourth / 64.0f);
         Serial.printf("----- %d:%d:%4f\n", event->channel, event->isNoteStartEvent, event->rate);
     };
 
@@ -34,20 +35,29 @@ void first_test() {
         kick->loopType = looptype_none;
         sequencer.addelement(kick);
     }
-    
-    loopelement *element1 = new loopelement();
-    element1->rate = 1.0f;
-    element1->start_tick = 64;
-    element1->stop_tick = 256;
-    element1->channel = 2;
-    element1->loopType = looptype_none;
-    sequencer.addelement(element1);
 
-    sequencer.start();
+    for (int i=0; i < 16; i++) {
+        loopelement *snare = new loopelement();
+        snare->rate = 1.0f;
+        snare->start_tick = ((i+1) * 16 * 4);
+        snare->stop_tick = ((i+1) * 16 * 4) + 15;
+        snare->channel = 2;
+        snare->loopType = looptype_none;
+        sequencer.addelement(snare);
+    }
+    sequencer.start(millis());
+   // sequencer.tick(0);
+   // sequencer.tick(250);
+  //  sequencer.tick(500);
+  //  sequencer.tick(750);
+  //  sequencer.tick(1000);
+  //  sequencer.tick(1250);
+  //  sequencer.tick(1500);
+
     while (true) {
        sequencer.tick(millis());
        //Serial.printf("%d:%d:%4f\n", position.bar, position.beat, position.sixtyFourth / 64.0f);
-       delay(50);
+       delay(5);
     }
     for (int i=0; i<8; i++) {
        sequencer.tick(millis());

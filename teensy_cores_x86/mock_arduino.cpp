@@ -21,6 +21,7 @@
 #include <sys/timeb.h>
 #include <iostream>
 #include "mock_arduino.h"
+#include <unistd.h>
 
 timeb t_start;
 unsigned long millis() {
@@ -31,7 +32,9 @@ unsigned long millis() {
 
 void delay(unsigned long ms) {
   unsigned long start = millis();
-  while(millis() - start < ms){}
+  while(millis() - start < ms){
+    usleep(1000);
+  }
 }
 
 void initialize_mock_arduino() {

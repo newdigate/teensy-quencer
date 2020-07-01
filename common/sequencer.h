@@ -11,6 +11,7 @@
 #include "songposition.h"
 #include "../teensy_cores_x86/mock_arduino.h"
 #include <functional>
+#include <algorithm>
 
 typedef enum looptype {
     looptype_none,
@@ -32,7 +33,11 @@ struct sequencerevent {
     bool isNoteStartEvent = true;
     float rate = 1.0;
     loopelement *parent = NULL;
-    bool operator<(const sequencerevent &foo) const { return position < foo.position; }
+
+    bool operator ()(sequencerevent *lhs, const sequencerevent *rhs) const
+    {
+        return lhs->position < rhs->position;
+    }
 };
 
 class sequencer {
@@ -65,11 +70,11 @@ public:
                 _lastevent = NULL;
             }
 
-            std::multiset<sequencerevent*>::iterator current; 
+            std::set<sequencerevent*>::iterator current;
             if (_lastevent==NULL ) 
                 current = events.begin();
             else {
-                current = events.find (_lastevent);
+                current = events.find(_lastevent);
                 current++;       
             } 
 
@@ -87,9 +92,9 @@ public:
         }
     }
 
-    void start() {
+    void start(unsigned long millis) {
         if (!_playing) {
-            _previousMilliseconds = millis();
+            _previousMilliseconds = millis;
             _lastSixtyFourthMillis = _previousMilliseconds;
             _lastevent = NULL;
             _playing = true;
@@ -128,7 +133,7 @@ private:
     unsigned long _previousMilliseconds = 0;
     int _loop_duration_bars = 4;
     std::vector<loopelement*> elements;
-    std::multiset<sequencerevent*> events;
+    std::set<sequencerevent*, sequencerevent> events;
     sequencerevent *_lastevent = NULL;
 };
 
