@@ -12,6 +12,7 @@ struct songposition {
     long bar = 1;
     unsigned long beat = 1;
     unsigned long sixtyFourth = 0;
+    unsigned long totalSixtyFourth = 0;
 };
 
 

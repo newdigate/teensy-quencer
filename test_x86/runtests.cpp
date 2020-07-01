@@ -21,12 +21,33 @@ void first_test() {
     tempo tempo(120.0f);
     songposition position;
     sequencer sequencer(tempo, position);
+    sequencer.onevent = [&] (sequencerevent *event) {
+        Serial.printf("----- %d:%d:%4f\n", event->channel, event->isNoteStartEvent, event->rate);
+    };
+
+    for (int i=0; i < 4; i++) {
+        loopelement *kick = new loopelement();
+        kick->rate = 1.0f;
+        kick->start_tick = (i * 64 * 4);
+        kick->stop_tick = (i * 64 * 4) + 63;
+        kick->channel = 1;
+        kick->loopType = looptype_none;
+        sequencer.addelement(kick);
+    }
+    
+    loopelement *element1 = new loopelement();
+    element1->rate = 1.0f;
+    element1->start_tick = 64;
+    element1->stop_tick = 256;
+    element1->channel = 2;
+    element1->loopType = looptype_none;
+    sequencer.addelement(element1);
 
     sequencer.start();
     while (true) {
        sequencer.tick(millis());
-       Serial.printf("%d:%d:%4f\n", position.bar, position.beat, position.sixtyFourth / 64.0f);
-       delay(10);
+       //Serial.printf("%d:%d:%4f\n", position.bar, position.beat, position.sixtyFourth / 64.0f);
+       delay(50);
     }
     for (int i=0; i<8; i++) {
        sequencer.tick(millis());
