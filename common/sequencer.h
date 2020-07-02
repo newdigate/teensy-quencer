@@ -163,7 +163,7 @@ private:
     std::vector<loopelement*> elements;
     std::vector<sequencerevent*> _sorted_events;
     
-    std::set<sequencerevent*, sequencerevent> events;
+    std::multiset<sequencerevent*, sequencerevent> events;
     int _last_event_index = 0;
 };
 

@@ -115,36 +115,36 @@ void setup() {
       }
   };
 
-  for (int i=0; i < 16; i++) {
+  for (int i=0; i < 8; i++) {
       loopelement *kick = new loopelement();
       kick->rate = 1.0f;
-      kick->start_tick = (i * 16 * 4);
-      kick->stop_tick = (i * 16 * 4) + 15;
+      kick->start_tick = (i * 32 * 4);
+      kick->stop_tick = (i * 32 * 4) + 31;
       kick->channel = 2;
       kick->loopType = looptypex_none;
       sequencer.addelement(kick);
   }
 
-  for (int i=0; i < 16; i++) {
+  for (int i=0; i < 8; i++) {
       loopelement *kick = new loopelement();
       kick->rate = 1.0f;
-      kick->start_tick = ((i+2) * 16 * 4);
-      kick->stop_tick = ((i+2) * 16 * 4) + 15;
+      kick->start_tick = (i * 32 * 4) + 64;
+      kick->stop_tick = (i * 32 * 4) + 128;
       kick->channel = 3;
       kick->loopType = looptypex_none;
       sequencer.addelement(kick);
   }
 
-  for (int i=0; i < 32; i++) {
-      loopelement *snare = new loopelement();
-      snare->rate = 1.0f;
-      snare->start_tick = ((i+2) * 8 * 4);
-      snare->stop_tick = ((i+2) * 8 * 4) + 15;
-      snare->channel = 1;
-      snare->loopType = looptypex_none;
-      sequencer.addelement(snare);
+  for (int i=0; i < 16; i++) {
+      loopelement *bass = new loopelement();
+      bass->rate = 1.0f;
+      bass->start_tick = (i * 16 * 4) + 32;
+      bass->stop_tick = (i * 16 * 4) + 64;
+      bass->channel = 1;
+      bass->loopType = looptypex_none;
+      sequencer.addelement(bass);
   }
- 
+
   sequencer.start(millis());
 
   mixer1.gain(0, 1);
@@ -157,10 +157,15 @@ void setup() {
   mixer2.gain(2, 1);
   mixer2.gain(3, 1);
 }
-
+int count = 0;
 void loop() {
   // put your main code here, to run repeatedly:
   sequencer.tick(millis());
+  count++;
+  if (count > 10000) {
+    sequencer.writescore();
+    count = 0;
+  }
 }
 
 unsigned __exidx_start;
