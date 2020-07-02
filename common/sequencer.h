@@ -7,11 +7,16 @@
 
 #include <set>
 #include <vector>
+#include <functional>
+
 #include "tempo.h"
 #include "songposition.h"
+
+#ifdef ARDUINO
+#include <Arduino.h>
+#else
 #include "../teensy_cores_x86/mock_arduino.h"
-#include <functional>
-#include <algorithm>
+#endif
 
 typedef enum looptype {
     looptype_none,
