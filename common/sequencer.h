@@ -63,32 +63,29 @@ public:
                 _position.bar += _position.beat / 4;
                 _position.beat %= 4;
             }
+
+            unsigned long totalSixtyFourth = _position.totalSixtyFourth;
+            bool wrapped = false;
             if (_position.bar > _loop_duration_bars) {
                 _position.bar %= _loop_duration_bars;
                 _position.sixtyFourth %= 64 * 4 *  _loop_duration_bars;
                 _position.totalSixtyFourth %= 64 * 4 * _loop_duration_bars;
-                _lastevent = NULL;
+                wrapped = true;
             }
 
-            std::set<sequencerevent*>::iterator current;
-            if (_lastevent==NULL ) 
-                current = events.begin();
-            else {
-                current = events.find(_lastevent);
-                current++;       
-            } 
-
-            while (current != events.end()) {
-                sequencerevent* c = *current;
-                if (c == NULL) break;
-                if ( c->position > _position.totalSixtyFourth) {
+            while (_last_event_index < events.size() ) {
+                sequencerevent* c = _sorted_events[_last_event_index];
+                if ( c->position > totalSixtyFourth) {
                     break;
                 } else {
                     onevent(c);
-                    _lastevent = c;
+                    _last_event_index++;
                 }
-                current++;
             }
+
+            if (wrapped)
+                _last_event_index = 0;
+
         }
     }
 
@@ -96,7 +93,7 @@ public:
         if (!_playing) {
             _previousMilliseconds = millis;
             _lastSixtyFourthMillis = _previousMilliseconds;
-            _lastevent = NULL;
+            _last_event_index = 0;
             _playing = true;
         }
     }
@@ -120,6 +117,12 @@ public:
         end->rate = 0.0f;
         end->parent = element;
         events.insert(end);
+
+        _sorted_events.clear();
+        for(std::set<sequencerevent*>::iterator i = events.begin(); i != events.end(); ++i) {
+            sequencerevent *event = *i;
+            _sorted_events.push_back(event);
+        }
     }
 
 private:
@@ -133,8 +136,10 @@ private:
     unsigned long _previousMilliseconds = 0;
     int _loop_duration_bars = 4;
     std::vector<loopelement*> elements;
+    std::vector<sequencerevent*> _sorted_events;
+    
     std::set<sequencerevent*, sequencerevent> events;
-    sequencerevent *_lastevent = NULL;
+    int _last_event_index = 0;
 };
 
 
