@@ -11,6 +11,7 @@
 
 #include "tempo.h"
 #include "songposition.h"
+#include "looptype.h"
 
 #ifdef ARDUINO
 #include <Arduino.h>
@@ -18,17 +19,11 @@
 #include "../teensy_cores_x86/mock_arduino.h"
 #endif
 
-typedef enum looptype {
-    looptype_none,
-    looptype_repeat,
-    looptype_pingpong
-} looptype;
-
 struct loopelement {
     uint8_t channel = 0;
     long start_tick = 0;
     long stop_tick = 0;
-    looptype loopType = looptype_none;
+    looptype_x loopType = looptypex_none;
     float rate = 1.0f;
 };
 

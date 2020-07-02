@@ -1,10 +1,22 @@
+#include <Audio.h>
+#include <SPI.h>
+#include <SD.h>
+
 #include "common/sequencer.h"
 #include "common/songposition.h"
 #include "common/tempo.h"
+#include "common/looptype.h"
 
 tempo tempo(120.0f);
 songposition position;
 sequencer sequencer(tempo, position);
+
+// GUItool: begin automatically generated code
+AudioPlaySdRawResampled  playSdRaw1;     //xy=324,457
+AudioOutputI2S           i2s2;           //xy=840.8571472167969,445.5714416503906
+AudioConnection          patchCord1(playSdRaw1, 0, i2s2, 0);
+AudioConnection          patchCord2(playSdRaw1, 0, i2s2, 1);
+// GUItool: end automatically generated code
 
 void setup() {
 
@@ -23,7 +35,7 @@ void setup() {
         kick->start_tick = (i * 64 * 4);
         kick->stop_tick = (i * 64 * 4) + 63;
         kick->channel = 1;
-        kick->loopType = looptype_none;
+        kick->loopType = looptypex_none;
         sequencer.addelement(kick);
     }
 
@@ -33,7 +45,7 @@ void setup() {
         snare->start_tick = ((i+1) * 16 * 4);
         snare->stop_tick = ((i+1) * 16 * 4) + 15;
         snare->channel = 2;
-        snare->loopType = looptype_none;
+        snare->loopType = looptypex_none;
         sequencer.addelement(snare);
     }
     sequencer.start(millis());
