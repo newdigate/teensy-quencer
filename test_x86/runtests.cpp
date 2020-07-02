@@ -26,25 +26,38 @@ void first_test() {
         Serial.printf("----- %d:%d:%4f\n", event->channel, event->isNoteStartEvent, event->rate);
     };
 
-    for (int i=0; i < 4; i++) {
-        loopelement *kick = new loopelement();
-        kick->rate = 1.0f;
-        kick->start_tick = (i * 64 * 4);
-        kick->stop_tick = (i * 64 * 4) + 63;
-        kick->channel = 1;
-        kick->loopType = looptype_none;
-        sequencer.addelement(kick);
-    }
+  for (int i=0; i < 16; i++) {
+      loopelement *kick = new loopelement();
+      kick->rate = 1.0f;
+      kick->start_tick = (i * 16 * 4);
+      kick->stop_tick = (i * 16 * 4) + 15;
+      kick->channel = 2;
+      kick->loopType = looptypex_none;
+      sequencer.addelement(kick);
+  }
 
-    for (int i=0; i < 16; i++) {
-        loopelement *snare = new loopelement();
-        snare->rate = 1.0f;
-        snare->start_tick = ((i+1) * 16 * 4);
-        snare->stop_tick = ((i+1) * 16 * 4) + 15;
-        snare->channel = 2;
-        snare->loopType = looptype_none;
-        sequencer.addelement(snare);
-    }
+  for (int i=0; i < 16; i++) {
+      loopelement *kick = new loopelement();
+      kick->rate = 1.0f;
+      kick->start_tick = ((i+2) * 16 * 4);
+      kick->stop_tick = ((i+2) * 16 * 4) + 15;
+      kick->channel = 3;
+      kick->loopType = looptypex_none;
+      sequencer.addelement(kick);
+  }
+
+  for (int i=0; i < 32; i++) {
+      loopelement *snare = new loopelement();
+      snare->rate = 1.0f;
+      snare->start_tick = ((i+2) * 8 * 4);
+      snare->stop_tick = ((i+2) * 8 * 4) + 15;
+      snare->channel = 1;
+      snare->loopType = looptypex_none;
+      sequencer.addelement(snare);
+  }
+
+    sequencer.writescore();
+  return;
     sequencer.start(millis());
    // sequencer.tick(0);
    // sequencer.tick(250);

@@ -100,6 +100,32 @@ public:
 
     std::function<void(sequencerevent *event)> onevent;
 
+    void writescore() {
+        char pixel[8][80];
+        memset(pixel, ' ',  80*8);
+        for (auto it = _sorted_events.begin(); it != _sorted_events.end(); it++)
+        {
+            sequencerevent *ev = *it;
+            if (ev->isNoteStartEvent) {
+                pixel[ev->channel][ev->position/16] = 'X';
+                unsigned length = (ev->parent->stop_tick - ev->parent->start_tick)/16;
+                for (int k=0; k < length; k++) {
+                    int x = (ev->position/16) + k + 1;
+                    if (x < 80)
+                        pixel[ev->channel][x] = '-';
+                }
+            }
+        }
+
+        Serial.println();
+        for (int j=0; j < 8; j++) {
+            for (int i=0; i < 80; i++) {
+                Serial.print(pixel[j][i]);
+            }
+            Serial.println();
+        }
+    }
+
     void addelement(loopelement *element) {
         elements.push_back(element);
         sequencerevent *start = new sequencerevent();
@@ -119,8 +145,7 @@ public:
         events.insert(end);
 
         _sorted_events.clear();
-        for(std::set<sequencerevent*>::iterator i = events.begin(); i != events.end(); ++i) {
-            sequencerevent *event = *i;
+        for(auto &&event:events) {
             _sorted_events.push_back(event);
         }
     }
