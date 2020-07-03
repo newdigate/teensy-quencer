@@ -26,14 +26,16 @@ void first_test() {
         Serial.printf("----- %d:%d:%4f\n", event->channel, event->isNoteStartEvent, event->rate);
     };
 
-  for (int i=0; i < 16; i++) {
+    sequencer.addPattern();
+
+    for (int i=0; i < 16; i++) {
       loopelement *kick = new loopelement();
       kick->rate = 1.0f;
       kick->start_tick = (i * 16 * 4);
       kick->stop_tick = (i * 16 * 4) + 15;
       kick->channel = 2;
       kick->loopType = looptypex_none;
-      sequencer.addelement(kick);
+      sequencer.addelement(0, kick);
   }
 
   for (int i=0; i < 16; i++) {
@@ -43,7 +45,7 @@ void first_test() {
       kick->stop_tick = ((i+2) * 16 * 4) + 15;
       kick->channel = 3;
       kick->loopType = looptypex_none;
-      sequencer.addelement(kick);
+      sequencer.addelement(0, kick);
   }
 
   for (int i=0; i < 32; i++) {
@@ -53,11 +55,11 @@ void first_test() {
       snare->stop_tick = ((i+2) * 8 * 4) + 15;
       snare->channel = 1;
       snare->loopType = looptypex_none;
-      sequencer.addelement(snare);
+      sequencer.addelement(0, snare);
   }
 
-    sequencer.writescore();
-  return;
+    sequencer.writescore(0);
+  //return;
     sequencer.start(millis());
    // sequencer.tick(0);
    // sequencer.tick(250);

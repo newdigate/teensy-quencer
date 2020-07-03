@@ -19,6 +19,8 @@
 #include "../teensy_cores_x86/mock_arduino.h"
 #endif
 
+using namespace std;
+
 struct loopelement {
     uint8_t channel = 0;
     long start_tick = 0;
@@ -72,9 +74,10 @@ public:
                 _position.totalSixtyFourth %= 64 * 4 * _loop_duration_bars;
                 wrapped = true;
             }
-
-            while (_last_event_index < events.size() ) {
-                sequencerevent* c = _sorted_events[_last_event_index];
+        
+            vector<sequencerevent*> *sortedEventsForPattern = _sorted_events[_currentPattern];
+            while (_last_event_index < sortedEventsForPattern->size() ) {
+                sequencerevent* c = (*sortedEventsForPattern)[_last_event_index];
                 if ( c->position > totalSixtyFourth) {
                     break;
                 } else {
@@ -83,14 +86,17 @@ public:
                 }
             }
 
-            if (wrapped)
+            if (wrapped) {
                 _last_event_index = 0;
-
+                _currentPattern = _nextPattern;
+            }
         }
     }
 
     void start(unsigned long millis) {
         if (!_playing) {
+            if (_numPatterns == 0)
+                addPattern();
             _previousMilliseconds = millis;
             _lastSixtyFourthMillis = _previousMilliseconds;
             _last_event_index = 0;
@@ -100,10 +106,15 @@ public:
 
     std::function<void(sequencerevent *event)> onevent;
 
-    void writescore() {
+    void writescore(unsigned pattern) {
+        if (pattern >= _numPatterns) return;
+
+        Serial.printf("pattern: %d", pattern);
+        vector<sequencerevent*> *sortedEventsForPatternPtr = _sorted_events[pattern];
+
         char pixel[8][80];
-        memset(pixel, ' ',  80*8);
-        for (auto it = _sorted_events.begin(); it != _sorted_events.end(); it++)
+        memset(pixel, '.',  80*8);
+        for (auto it = sortedEventsForPatternPtr->begin(); it != sortedEventsForPatternPtr->end(); it++)
         {
             sequencerevent *ev = *it;
             if (ev->isNoteStartEvent) {
@@ -120,21 +131,51 @@ public:
         Serial.println();
         for (int j=0; j < 8; j++) {
             for (int i=0; i < 80; i++) {
+                if (i % 16 == 0)
+                    Serial.print("|");
+                if (i % 4 == 0)
+                    Serial.print(" ");
                 Serial.print(pixel[j][i]);
             }
             Serial.println();
         }
     }
 
-    void addelement(loopelement *element) {
-        elements.push_back(element);
+
+
+    void addPattern() {
+        vector<loopelement*> *elementsForPattern = new vector<loopelement*>();
+        _elements.push_back(elementsForPattern);
+
+        vector<sequencerevent*> *sortedEventsForPattern = new vector<sequencerevent*>();
+        _sorted_events.push_back(sortedEventsForPattern);
+
+        _numPatterns++;
+    }
+
+    void setNextPattern(unsigned nextPattern) {
+        if (nextPattern >= _numPatterns) return;
+        _nextPattern = nextPattern;
+    }
+
+    void addelement(unsigned pattern, loopelement *element) {
+        if (pattern >= _numPatterns) return;
+
+        vector<loopelement*> *elementsForPattern = _elements[pattern];
+        elementsForPattern->push_back(element);
+
+        vector<sequencerevent*> *sortedEventsForPatternPtr = _sorted_events[pattern];
+
+        multiset<sequencerevent*, sequencerevent> eventsForPattern;
+        eventsForPattern.insert(sortedEventsForPatternPtr->begin(), sortedEventsForPatternPtr->end());
+
         sequencerevent *start = new sequencerevent();
         start->channel = element->channel;
         start->position = element->start_tick;
         start->isNoteStartEvent = true;
         start->rate = element->rate;
         start->parent = element;
-        events.insert(start);
+        eventsForPattern.insert(start);
 
         sequencerevent *end = new sequencerevent();
         end->channel = element->channel;
@@ -142,11 +183,11 @@ public:
         end->isNoteStartEvent = false;
         end->rate = 0.0f;
         end->parent = element;
-        events.insert(end);
+        eventsForPattern.insert(end);
 
-        _sorted_events.clear();
-        for(auto &&event:events) {
-            _sorted_events.push_back(event);
+        sortedEventsForPatternPtr->clear();
+        for(auto &&event:eventsForPattern) {
+            sortedEventsForPatternPtr->push_back(event);
         }
     }
 
@@ -154,16 +195,19 @@ private:
     tempo &_tempo;
     songposition &_position;
     bool _playing = false;
+    unsigned _numPatterns = 0;
+    unsigned _currentPattern = 0;
+    unsigned _nextPattern = 0;
 
     unsigned long _sixtyFourth = 0;
     unsigned long _lastSixtyFourthMillis = 0;
     unsigned long _milliseconds = 0;
     unsigned long _previousMilliseconds = 0;
     int _loop_duration_bars = 4;
-    std::vector<loopelement*> elements;
-    std::vector<sequencerevent*> _sorted_events;
+    vector< vector<loopelement*> * > _elements;
+    vector< vector<sequencerevent*> * > _sorted_events;
     
-    std::multiset<sequencerevent*, sequencerevent> events;
+
     int _last_event_index = 0;
 };
 
