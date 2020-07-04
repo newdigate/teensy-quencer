@@ -53,10 +53,17 @@ AudioControlCS42448      cs42448_1;      //xy=853,560
 // GUItool: end automatically generated code
 
 //                       !               !               !               !      
-const char* pattern4x4  = "X...X...X...X...X...X...X...X...X...X...X...X...X...X...X...X..."; 
-const char* patternSyn  = "..X...X...X...X...X...X...X...X...X...X...X...X...X...X...X....."; 
-const char* patternSnr  = "....x.......x.......x.......x.......x.......x.......x.......x..."; 
-const char* patternHat  = "..x...x...x...x...x...x...x...x...x...x...x...x...x...x...x...x."; 
+const char* pattern4x4 = "X...X...X...X...X...X...X...X...X...X...X...X...X...X...X...X..."; 
+const char* patternSyn = "..X...X...X...X...X...X...X...X...X...X...X...X...X...X...X....."; 
+const char* patternSnr = "....x.......x.......x.......x.......x.......x.......x.......x..."; 
+const char* patternHat = "..x...x...x...x...x...x...x...x...x...x...x...x...x...x...x...x."; 
+const char* pattern8x4 = "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."; 
+const char* pattern164 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"; 
+const char* pattern3x4 = ".xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx.xxx"; 
+
+//                         !               !               !               !      
+const char* pathalf4x4 = "X.......X.......X.......X.......X.......X.......X.......X......."; 
+const char* pathalfSyn = "....X.......X.......X.......X.......X.......X.......X.......X...";
 
 //                       !               !               !               !      
 const char* pattern1a = "x...............x...............x...............x.............x."; 
@@ -79,6 +86,7 @@ const char* pattern4c = "..............x...............................x........
 
 
 //                       !       -       !       -        !      -       !       -
+const char* xpattern0 = "..X...X...X...X...X...X...X...X...X...X...X...X...X...X........."; 
 const char* xpattern1 = "..........................................................B....."; 
 const char* xpattern2 = "..d.........................x......X........x.....C.............";
 
@@ -132,6 +140,12 @@ void triggerAudioEvent(sequencerevent *event, AudioPlaySdWav &audio, String file
     stopSample(audio);
 }
 
+
+sequencer *beatsequencer;
+sequencer *hatsequencer;
+sequencer *basssequencer;
+sequencer *fxsequencer;
+
 void setup() {
   AudioMemory(80);
   Serial.begin(9600);    
@@ -154,96 +168,131 @@ void setup() {
 
   bitcrusher1.bits(8);
 
-  sequencer *sequencer = multisequencer.newSequencer();
-  
-  sequencer->onevent = [] (sequencerevent *event) {
+  beatsequencer = multisequencer.newSequencer();
+  hatsequencer = multisequencer.newSequencer();
+  basssequencer = multisequencer.newSequencer();
+  fxsequencer = multisequencer.newSequencer();
+
+  beatsequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
-        case 1: triggerAudioEvent(event, playSdRaw1, "BASS.WAV"); break;
-        case 2: triggerAudioEvent(event, playSdRaw2, "KICK.WAV"); break;
-        case 3: triggerAudioEvent(event, playSdRaw3, "SNARE.WAV"); break;
-        case 4: triggerAudioEvent(event, playSdRaw4, "Hihat.WAV"); break;
-        case 5: triggerAudioEvent(event, playSdRaw5, "BASSSLID.WAV"); break;      
+        case 0: triggerAudioEvent(event, playSdRaw1, "KICK.WAV"); break;
+        case 1: triggerAudioEvent(event, playSdRaw2, "SNARE.WAV"); break;      
+        default: break;
+      }
+  };
+
+  hatsequencer->onevent = [] (sequencerevent *event) {
+      switch(event->channel) {
+        case 0: triggerAudioEvent(event, playSdRaw4, "Hihat.WAV"); break;
+        default: break;
+      }
+  };
+
+  basssequencer->onevent = [] (sequencerevent *event) {
+      switch(event->channel) {
+        case 0: triggerAudioEvent(event, playSdRaw1, "BASS.WAV"); break;
+        case 1: triggerAudioEvent(event, playSdRaw5, "BASSSLID.WAV"); break;
+        default: break;
+      }
+  };
+
+  fxsequencer->onevent = [] (sequencerevent *event) {
+      switch(event->channel) { 
         case 0:
           int r = random(11); 
           triggerAudioEvent(event, playSdRaw6, fxnames[r]); break;
 
-        default:
-          break;
+        default: break;
       }
   };
 
   int pattern = 0;
+  
+  // beatsequencer
+  beatsequencer->addPattern(); // no beat
+  pattern++;
+  
+  beatsequencer->addPattern(); // kick solo 4 x 4
+  readPattern(0, pattern, pattern4x4, beatsequencer); //kick
+  pattern++;
 
-  sequencer->addPattern();
-  readPattern(0, pattern, xpattern2, sequencer); //FX
-  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
+  beatsequencer->addPattern(); // kick solo 4 x 4 + snare
+  readPattern(0, pattern, pattern4x4, beatsequencer); //kick
+  readPattern(1, pattern, patternSnr, beatsequencer); //snare
+  pattern++;
+
+  beatsequencer->addPattern(); // breakbeat
+  readPattern(0, pattern, pattern1c, beatsequencer); //kick
+  readPattern(1, pattern, patternSnr, beatsequencer); //snare
+  pattern++;
+
+  beatsequencer->addPattern(); // half-time
+  readPattern(0, pattern, pathalf4x4, beatsequencer); //kick
+  readPattern(1, pattern, pathalfSyn, beatsequencer); //snare
+  pattern++;
+
+  beatsequencer->addPattern(); // snare solo
+  readPattern(1, pattern, patternSnr, beatsequencer); //snare
+
+  
+  
+  // hatsequencer
+  pattern = 0;
+  hatsequencer->addPattern(); // no hats
+  pattern++;
+ 
+  hatsequencer->addPattern();
+  readPattern(0, pattern, patternSyn, hatsequencer); // syncopated
   pattern++;
   
-  sequencer->addPattern();
-  readPattern(2, pattern, pattern4x4, sequencer); //kick
-  readPattern(0, pattern, xpattern2, sequencer); //FX
-  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
+  hatsequencer->addPattern();
+  readPattern(0, pattern, pattern8x4, hatsequencer); // 8 x 4
   pattern++;
   
-  sequencer->addPattern();
-  readPattern(2, pattern, pattern4x4, sequencer); //kick
-  readPattern(1, pattern, patternSyn, sequencer); //bass
-  readPattern(0, pattern, xpattern2, sequencer); //FX
-  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
+  hatsequencer->addPattern();
+  readPattern(0, pattern, pattern164, hatsequencer); // 16 x 4
   pattern++;
-  
-  sequencer->addPattern();
-  readPattern(2, pattern, pattern4x4, sequencer); //kick
-  readPattern(1, pattern, patternSyn, sequencer); //bass
-  readPattern(3, pattern, patternSnr, sequencer); //snare
-  readPattern(0, pattern, xpattern2, sequencer); //FX
-  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
+
+  hatsequencer->addPattern();
+  readPattern(0, pattern, pathalf4x4, hatsequencer); // 4 x 4
   pattern++;
-    
-  sequencer->addPattern();
-  readPattern(2, pattern, pattern4x4, sequencer); //kick
-  readPattern(1, pattern, patternSyn, sequencer); //bass
-  readPattern(4, pattern, patternHat, sequencer); //hihat
-  readPattern(3, pattern, patternSnr, sequencer); //snare
-  readPattern(0, pattern, xpattern2, sequencer); //FX
-  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
+
+  hatsequencer->addPattern();
+  readPattern(0, pattern, pattern3x4, hatsequencer); // 3 x 4
+
+
+
+ 
+  // basssequencer
+  pattern = 0;
+  basssequencer->addPattern(); // no bass
   pattern++;
-  
-  // Pattern 2:
-  sequencer->addPattern();
-  readPattern(2, pattern, pattern1a, sequencer); // kick
-  readPattern(3, pattern, pattern3a, sequencer); // snare
-  readPattern(1, pattern, pattern2a, sequencer); // bass
-  readPattern(4, pattern, pattern4a, sequencer); // hihat
-  readPattern(0, pattern, xpattern2, sequencer); //FX
-  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
+
+  basssequencer->addPattern(); // syncopated
+  readPattern(0, pattern, patternSyn, basssequencer); // bass
   pattern++;
-    
-  // Pattern 3:
-  sequencer->addPattern();
-  readPattern(2, pattern, pattern1b, sequencer); // kick
-  readPattern(3, pattern, pattern3b, sequencer); // snare
-  readPattern(1, pattern, pattern2b, sequencer); // bass
-  readPattern(4, pattern, pattern4b, sequencer); // hihat
-  readPattern(0, pattern, xpattern2, sequencer); //FX
-  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
+
+  basssequencer->addPattern(); // syncopated, with last as slide
+  readPattern(0, pattern, xpattern0, basssequencer); // 3 x 4
+  readPattern(1, pattern, xpattern1, basssequencer); 
+
+
+
+  //fxsequencer
+  pattern = 0;
+  fxsequencer->addPattern(); // no fx
   pattern++;
-    
-  // Pattern 4:
-  sequencer->addPattern();
-  readPattern(2, pattern, pattern1c, sequencer); // kick
-  readPattern(3, pattern, pattern3c, sequencer); // snare
-  readPattern(1, pattern, pattern2c, sequencer); // bass
-  readPattern(4, pattern, pattern4c, sequencer); // hihat
-  readPattern(0, pattern, xpattern2, sequencer); //FX
-  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
+
+  fxsequencer->addPattern(); // inbetween fx
+  readPattern(0, pattern, xpattern2, fxsequencer); // fx
   pattern++;
-    
+     
   multisequencer.start(millis());
 }
 int count = 0;
 
-String inString = ""; 
+String inputChannel="", inString = ""; 
+bool inputChannelEntered = false;
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -255,7 +304,7 @@ void loop() {
     //
     count = 0;
   }
-/*
+
   while (Serial.available()) {
     char inChar = Serial.read();
     if (isDigit(inChar)) {
@@ -263,13 +312,36 @@ void loop() {
       inString += (char)inChar;
     }
     if (inChar == '\n') {
-      Serial.printf("setting next patteren to %d\n", inString.toInt());
-      sequencer.setNextPattern(inString.toInt());
-      sequencer.writescore(inString.toInt());
-      inString = "";
+      if (inputChannelEntered == false) {
+        inputChannel = inString;
+        inputChannelEntered = true;
+        Serial.printf("input channel: %d\n", inputChannel.toInt());
+        inString = "";
+      } else {
+
+        sequencer *currentSequencer = NULL;
+        switch (inputChannel.toInt()) {
+          case 0: currentSequencer = beatsequencer; break;
+          case 1: currentSequencer = hatsequencer; break;
+          case 2: currentSequencer = basssequencer; break;
+          case 3: currentSequencer = fxsequencer; break;
+          default:
+            Serial.printf("invalid channel input (should be 0,1,2,3): %s\n", inputChannel);
+            break;
+        } 
+              
+        if (currentSequencer != NULL) {
+          Serial.printf("setting next patteren to %d\n", inString.toInt());
+          currentSequencer->setNextPattern(inString.toInt());
+          currentSequencer->writescore(inString.toInt());
+        }
+        inString = "";
+        inputChannel = "";    
+        inputChannelEntered = false; 
+      }
     }
   }
-  */
+
 }
 
 unsigned __exidx_start;
