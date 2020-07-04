@@ -9,9 +9,7 @@
 
 tempo tempo(120.0f);
 
-songposition position;
-
-sequencer sequencer(tempo, position);
+multisequencer multisequencer(tempo);
 
 // GUItool: begin automatically generated code
 AudioPlaySdWav           playSdRaw6;     //xy=180,429
@@ -84,7 +82,7 @@ const char* pattern4c = "..............x...............................x........
 const char* xpattern1 = "..........................................................B....."; 
 const char* xpattern2 = "..d.........................x......X........x.....C.............";
 
-void readPattern(int channel, int pattern, const char* row) {
+void readPattern(int channel, int pattern, const char* row, sequencer *sequencer) {
   int index = 0;
 
   while (row[index] != 0) {
@@ -106,7 +104,7 @@ void readPattern(int channel, int pattern, const char* row) {
         hihat->stop_tick = (index * 16) + notelength;
         hihat->channel = channel;
         hihat->loopType = looptypex_none;
-        sequencer.addelement(pattern, hihat);
+        sequencer->addelement(pattern, hihat);
     }
     
     index++;
@@ -155,7 +153,10 @@ void setup() {
   AudioInterrupts();   
 
   bitcrusher1.bits(8);
-  sequencer.onevent = [] (sequencerevent *event) {
+
+  sequencer *sequencer = multisequencer.newSequencer();
+  
+  sequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
         case 1: triggerAudioEvent(event, playSdRaw1, "BASS.WAV"); break;
         case 2: triggerAudioEvent(event, playSdRaw2, "KICK.WAV"); break;
@@ -173,72 +174,72 @@ void setup() {
 
   int pattern = 0;
 
-  sequencer.addPattern();
-  readPattern(0, pattern, xpattern2); //FX
-  readPattern(5, pattern, xpattern1); //Bassslide
+  sequencer->addPattern();
+  readPattern(0, pattern, xpattern2, sequencer); //FX
+  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
   pattern++;
   
-  sequencer.addPattern();
-  readPattern(2, pattern, pattern4x4); //kick
-  readPattern(0, pattern, xpattern2); //FX
-  readPattern(5, pattern, xpattern1); //Bassslide
+  sequencer->addPattern();
+  readPattern(2, pattern, pattern4x4, sequencer); //kick
+  readPattern(0, pattern, xpattern2, sequencer); //FX
+  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
   pattern++;
   
-  sequencer.addPattern();
-  readPattern(2, pattern, pattern4x4); //kick
-  readPattern(1, pattern, patternSyn); //bass
-  readPattern(0, pattern, xpattern2); //FX
-  readPattern(5, pattern, xpattern1); //Bassslide
+  sequencer->addPattern();
+  readPattern(2, pattern, pattern4x4, sequencer); //kick
+  readPattern(1, pattern, patternSyn, sequencer); //bass
+  readPattern(0, pattern, xpattern2, sequencer); //FX
+  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
   pattern++;
   
-  sequencer.addPattern();
-  readPattern(2, pattern, pattern4x4); //kick
-  readPattern(1, pattern, patternSyn); //bass
-  readPattern(3, pattern, patternSnr); //snare
-  readPattern(0, pattern, xpattern2); //FX
-  readPattern(5, pattern, xpattern1); //Bassslide
+  sequencer->addPattern();
+  readPattern(2, pattern, pattern4x4, sequencer); //kick
+  readPattern(1, pattern, patternSyn, sequencer); //bass
+  readPattern(3, pattern, patternSnr, sequencer); //snare
+  readPattern(0, pattern, xpattern2, sequencer); //FX
+  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
   pattern++;
     
-  sequencer.addPattern();
-  readPattern(2, pattern, pattern4x4); //kick
-  readPattern(1, pattern, patternSyn); //bass
-  readPattern(4, pattern, patternHat); //hihat
-  readPattern(3, pattern, patternSnr); //snare
-  readPattern(0, pattern, xpattern2); //FX
-  readPattern(5, pattern, xpattern1); //Bassslide
+  sequencer->addPattern();
+  readPattern(2, pattern, pattern4x4, sequencer); //kick
+  readPattern(1, pattern, patternSyn, sequencer); //bass
+  readPattern(4, pattern, patternHat, sequencer); //hihat
+  readPattern(3, pattern, patternSnr, sequencer); //snare
+  readPattern(0, pattern, xpattern2, sequencer); //FX
+  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
   pattern++;
   
   // Pattern 2:
-  sequencer.addPattern();
-  readPattern(2, pattern, pattern1a); // kick
-  readPattern(3, pattern, pattern3a); // snare
-  readPattern(1, pattern, pattern2a); // bass
-  readPattern(4, pattern, pattern4a); // hihat
-  readPattern(0, pattern, xpattern2); //FX
-  readPattern(5, pattern, xpattern1); //Bassslide
+  sequencer->addPattern();
+  readPattern(2, pattern, pattern1a, sequencer); // kick
+  readPattern(3, pattern, pattern3a, sequencer); // snare
+  readPattern(1, pattern, pattern2a, sequencer); // bass
+  readPattern(4, pattern, pattern4a, sequencer); // hihat
+  readPattern(0, pattern, xpattern2, sequencer); //FX
+  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
   pattern++;
     
   // Pattern 3:
-  sequencer.addPattern();
-  readPattern(2, pattern, pattern1b); // kick
-  readPattern(3, pattern, pattern3b); // snare
-  readPattern(1, pattern, pattern2b); // bass
-  readPattern(4, pattern, pattern4b); // hihat
-  readPattern(0, pattern, xpattern2); //FX
-  readPattern(5, pattern, xpattern1); //Bassslide
+  sequencer->addPattern();
+  readPattern(2, pattern, pattern1b, sequencer); // kick
+  readPattern(3, pattern, pattern3b, sequencer); // snare
+  readPattern(1, pattern, pattern2b, sequencer); // bass
+  readPattern(4, pattern, pattern4b, sequencer); // hihat
+  readPattern(0, pattern, xpattern2, sequencer); //FX
+  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
   pattern++;
     
   // Pattern 4:
-  sequencer.addPattern();
-  readPattern(2, pattern, pattern1c); // kick
-  readPattern(3, pattern, pattern3c); // snare
-  readPattern(1, pattern, pattern2c); // bass
-  readPattern(4, pattern, pattern4c); // hihat
-  readPattern(0, pattern, xpattern2); //FX
-  readPattern(5, pattern, xpattern1); //Bassslide
+  sequencer->addPattern();
+  readPattern(2, pattern, pattern1c, sequencer); // kick
+  readPattern(3, pattern, pattern3c, sequencer); // snare
+  readPattern(1, pattern, pattern2c, sequencer); // bass
+  readPattern(4, pattern, pattern4c, sequencer); // hihat
+  readPattern(0, pattern, xpattern2, sequencer); //FX
+  readPattern(5, pattern, xpattern1, sequencer); //Bassslide
   pattern++;
     
-  sequencer.start(millis());
+  multisequencer.start(millis());
 }
 int count = 0;
 
@@ -246,7 +247,7 @@ String inString = "";
 
 void loop() {
   // put your main code here, to run repeatedly:
-  sequencer.tick(millis());
+  multisequencer.tick(millis());
   
   count++;
   if (count > 100000) {
@@ -254,7 +255,7 @@ void loop() {
     //
     count = 0;
   }
-
+/*
   while (Serial.available()) {
     char inChar = Serial.read();
     if (isDigit(inChar)) {
@@ -268,6 +269,7 @@ void loop() {
       inString = "";
     }
   }
+  */
 }
 
 unsigned __exidx_start;

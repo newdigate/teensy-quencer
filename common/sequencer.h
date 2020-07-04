@@ -44,7 +44,7 @@ struct sequencerevent {
 
 class sequencer {
 public:
-    sequencer(tempo &tempo, songposition &position) : _tempo(tempo), _position(position) {}
+    sequencer(tempo &tempo, songposition *position) : _tempo(tempo), _position(position) {}
 
     void tick(unsigned long millisecs) {
         if (!_playing) return;
@@ -55,23 +55,23 @@ public:
             _lastSixtyFourthMillis = millisecs;
 
             unsigned long deltaSixtyFourths = deltaMillis / _tempo._milliseconds_per_64th;
-            _position.sixtyFourth += deltaSixtyFourths;
-            _position.totalSixtyFourth += deltaSixtyFourths;
-            if (_position.sixtyFourth >= 64) {
-                _position.beat += _position.sixtyFourth / 64;
-                _position.sixtyFourth %= 64;
+            _position->sixtyFourth += deltaSixtyFourths;
+            _position->totalSixtyFourth += deltaSixtyFourths;
+            if (_position->sixtyFourth >= 64) {
+                _position->beat += _position->sixtyFourth / 64;
+                _position->sixtyFourth %= 64;
             }
-            if (_position.beat > 4) {
-                _position.bar += _position.beat / 4;
-                _position.beat %= 4;
+            if (_position->beat > 4) {
+                _position->bar += _position->beat / 4;
+                _position->beat %= 4;
             }
 
-            unsigned long totalSixtyFourth = _position.totalSixtyFourth;
+            unsigned long totalSixtyFourth = _position->totalSixtyFourth;
             bool wrapped = false;
-            if (_position.bar > _loop_duration_bars) {
-                _position.bar %= _loop_duration_bars;
-                _position.sixtyFourth %= 64 * 4 *  _loop_duration_bars;
-                _position.totalSixtyFourth %= 64 * 4 * _loop_duration_bars;
+            if (_position->bar > _loop_duration_bars) {
+                _position->bar %= _loop_duration_bars;
+                _position->sixtyFourth %= 64 * 4 *  _loop_duration_bars;
+                _position->totalSixtyFourth %= 64 * 4 * _loop_duration_bars;
                 wrapped = true;
             }
         
@@ -193,7 +193,7 @@ public:
 
 private:
     tempo &_tempo;
-    songposition &_position;
+    songposition *_position;
     bool _playing = false;
     unsigned _numPatterns = 0;
     unsigned _currentPattern = 0;
@@ -211,5 +211,38 @@ private:
     int _last_event_index = 0;
 };
 
+class multisequencer {
+public:
 
+    multisequencer(tempo &tempo) : _tempo(tempo) {
+
+    }
+
+    sequencer* newSequencer() {
+        songposition *p = new songposition();
+        sequencer *result = new sequencer(_tempo, p);
+        _sequencers.push_back(result);
+        _numSequencers++;
+        return result;
+    }
+
+    void start(unsigned millis) {
+        for (auto it = _sequencers.begin(); it != _sequencers.end(); it++) {
+            sequencer *s = *it;
+            s->start(millis);
+        }
+    }
+
+    void tick(unsigned millis) {
+        for (auto it = _sequencers.begin(); it != _sequencers.end(); it++) {
+            sequencer *s = *it;
+            s->tick(millis);
+        }
+    }
+
+private:
+    tempo &_tempo;
+    unsigned _numSequencers = 0;
+    vector<sequencer*> _sequencers;
+};
 #endif //TEENSYSEQUENCER_SEQUENCER_H
