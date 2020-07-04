@@ -36,12 +36,12 @@ multisequencer multisequencer(tempo);
   pattern++;
   
   beatsequencer->addPattern(); // kick solo 4 x 4
-  readPattern(0, pattern, pattern4x4, beatsequencer); //kick
+  readPattern(0, pattern, pattern4x4, sequencer); //kick
   pattern++;
 
   beatsequencer->addPattern(); // kick solo 4 x 4 + snare
-  readPattern(0, pattern, pattern4x4, beatsequencer); //kick
-  readPattern(1, pattern, patternSnr, beatsequencer); //snare
+  readPattern(0, pattern, pattern4x4, sequencer); //kick
+  readPattern(1, pattern, patternSnr, sequencer); //snare
   pattern++;
 ```
 
