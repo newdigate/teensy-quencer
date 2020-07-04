@@ -15,14 +15,14 @@ multisequencer multisequencer(tempo);
 AudioPlaySdWav           playSdRaw6;     //xy=180,429
 AudioPlaySdWav           playSdRaw1;     //xy=278,158
 AudioFilterStateVariable filter1;        //xy=289,544
+AudioPlaySdWav           playSdRaw5;     //xy=310,372
 AudioPlaySdWav           playSdRaw4;     //xy=405,309
-AudioPlaySdWav           playSdRaw5;     //xy=406,361
 AudioPlaySdWav           playSdRaw3;     //xy=409,264
 AudioPlaySdWav           playSdRaw2;     //xy=410,227
 AudioEffectBitcrusher    bitcrusher1;    //xy=452,120
 AudioEffectDelay         delay1;         //xy=528,566
+AudioMixer4              mixer7;         //xy=634,368
 AudioMixer4              mixer3;         //xy=645,270
-AudioMixer4              mixer7;         //xy=652,412
 AudioMixer4              mixer2;         //xy=838,416
 AudioMixer4              mixer1;         //xy=860,302
 AudioOutputTDM           tdm3;           //xy=1147,355
@@ -30,16 +30,16 @@ AudioConnection          patchCord1(playSdRaw6, 0, filter1, 0);
 AudioConnection          patchCord2(playSdRaw1, 0, bitcrusher1, 0);
 AudioConnection          patchCord3(filter1, 1, mixer7, 1);
 AudioConnection          patchCord4(filter1, 2, delay1, 0);
-AudioConnection          patchCord5(playSdRaw4, 0, mixer3, 3);
-AudioConnection          patchCord6(playSdRaw5, 0, mixer1, 1);
-AudioConnection          patchCord7(playSdRaw5, 1, mixer2, 2);
-AudioConnection          patchCord8(playSdRaw3, 0, mixer3, 2);
-AudioConnection          patchCord9(playSdRaw2, 0, mixer3, 1);
-AudioConnection          patchCord10(bitcrusher1, 0, mixer3, 0);
-AudioConnection          patchCord11(delay1, 1, mixer7, 2);
-AudioConnection          patchCord12(mixer3, 0, mixer1, 0);
-AudioConnection          patchCord13(mixer3, 0, mixer2, 0);
-AudioConnection          patchCord14(mixer7, 0, mixer2, 1);
+AudioConnection          patchCord5(playSdRaw5, 0, mixer7, 0);
+AudioConnection          patchCord6(playSdRaw4, 0, mixer3, 3);
+AudioConnection          patchCord7(playSdRaw3, 0, mixer3, 2);
+AudioConnection          patchCord8(playSdRaw2, 0, mixer3, 1);
+AudioConnection          patchCord9(bitcrusher1, 0, mixer3, 0);
+AudioConnection          patchCord10(delay1, 1, mixer7, 2);
+AudioConnection          patchCord11(mixer7, 0, mixer1, 2);
+AudioConnection          patchCord12(mixer7, 0, mixer2, 1);
+AudioConnection          patchCord13(mixer3, 0, mixer1, 0);
+AudioConnection          patchCord14(mixer3, 0, mixer2, 0);
 AudioConnection          patchCord15(mixer2, 0, tdm3, 2);
 AudioConnection          patchCord16(mixer2, 0, tdm3, 6);
 AudioConnection          patchCord17(mixer2, 0, tdm3, 10);
@@ -50,11 +50,10 @@ AudioConnection          patchCord21(mixer1, 0, tdm3, 8);
 AudioConnection          patchCord22(mixer1, 0, tdm3, 12);
 AudioControlCS42448      cs42448_1;      //xy=853,560
 // GUItool: end automatically generated code
-// GUItool: end automatically generated code
 
 //                       !               !               !               !      
 const char* pattern4x4 = "X...X...X...X...X...X...X...X...X...X...X...X...X...X...X...X..."; 
-const char* patternSyn = "..X...X...X...X...X...X...X...X...X...X...X...X...X...X...X....."; 
+const char* patternSyn = "..X...X...X...X...X...X...X...X...X...X...X...X...X...X...X...X."; 
 const char* patternSnr = "....x.......x.......x.......x.......x.......x.......x.......x..."; 
 const char* patternHat = "..x...x...x...x...x...x...x...x...x...x...x...x...x...x...x...x."; 
 const char* pattern8x4 = "x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x."; 
@@ -86,9 +85,9 @@ const char* pattern4c = "..............x...............................x........
 
 
 //                       !       -       !       -        !      -       !       -
-const char* xpattern0 = "..X...X...X...X...X...X...X...X...X...X...X...X...X...X........."; 
+const char* xpattern0 = "..X...X...X...X...X...X...X...X...X...X...X...X...X...X......X.."; 
 const char* xpattern1 = "..........................................................B....."; 
-const char* xpattern2 = "..d.........................x......X........x.....C.............";
+const char* xpattern2 = "..d.................................B...............C...........";
 
 void readPattern(int channel, int pattern, const char* row, sequencer *sequencer) {
   int index = 0;
@@ -119,7 +118,9 @@ void readPattern(int channel, int pattern, const char* row, sequencer *sequencer
   }
 }
 
-String fxnames[12] = {"FX04.wav", "FX09.wav","FX10.wav","FX12.wav", "FX21.wav", "FX28.wav","FX30.wav","FX34.wav","FX35.wav","FX40.wav","FX42.wav","FX77.wav"}; 
+String fxnames[14] = {"FX04.wav", "FX09.wav","FX10.wav","FX12.wav", "FX21.wav", "FX28.wav","FX30.wav","FX34.wav","FX35.wav","FX40.wav","FX42.wav","FX77.wav", "HIT1.wav", "HIT2.wav"}; 
+String bassslidenames[11] = {"BASSSL01.wav", "BASSSL02.wav","BASSSL03.wav","BASSSL04.wav", "BASSSL05.wav", "BASSSL06.wav","BASSSL07.wav","BASSSL08.wav","BASSSL09.wav","BASSSL10.wav","BASSSL11.wav"}; 
+
 
 void playSample(AudioPlaySdWav &audio, String s) { 
   if (audio.isPlaying())
@@ -166,7 +167,7 @@ void setup() {
   //cs42448_1.inputLevel(1);
   AudioInterrupts();   
 
-  bitcrusher1.bits(8);
+  bitcrusher1.bits(16);
 
   beatsequencer = multisequencer.newSequencer();
   hatsequencer = multisequencer.newSequencer();
@@ -191,7 +192,9 @@ void setup() {
   basssequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
         case 0: triggerAudioEvent(event, playSdRaw1, "BASS.WAV"); break;
-        case 1: triggerAudioEvent(event, playSdRaw5, "BASSSLID.WAV"); break;
+        case 1: 
+          int r = random(10); 
+          triggerAudioEvent(event, playSdRaw6, bassslidenames[r]); break;
         default: break;
       }
   };
@@ -199,7 +202,7 @@ void setup() {
   fxsequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) { 
         case 0:
-          int r = random(11); 
+          int r = random(13); 
           triggerAudioEvent(event, playSdRaw6, fxnames[r]); break;
 
         default: break;
@@ -275,6 +278,11 @@ void setup() {
   basssequencer->addPattern(); // syncopated, with last as slide
   readPattern(0, pattern, xpattern0, basssequencer); // 3 x 4
   readPattern(1, pattern, xpattern1, basssequencer); 
+  pattern++;
+
+  basssequencer->addPattern(); // syncopated, with last as slide
+  readPattern(0, pattern, pattern2a, basssequencer); // .xxx.xxx.xxx.xxx
+  readPattern(1, pattern, xpattern1, basssequencer); 
 
 
 
@@ -288,6 +296,8 @@ void setup() {
   pattern++;
      
   multisequencer.start(millis());
+  printusage();
+
 }
 int count = 0;
 
@@ -305,8 +315,9 @@ void loop() {
     count = 0;
   }
 
+
   while (Serial.available()) {
-    char inChar = Serial.read();
+    char inChar = Serial.read();   
     if (isDigit(inChar)) {
       // convert the incoming byte to a char and add it to the string:
       inString += (char)inChar;
@@ -315,7 +326,6 @@ void loop() {
       if (inputChannelEntered == false) {
         inputChannel = inString;
         inputChannelEntered = true;
-        Serial.printf("input channel: %d\n", inputChannel.toInt());
         inString = "";
       } else {
 
@@ -338,10 +348,24 @@ void loop() {
         inString = "";
         inputChannel = "";    
         inputChannelEntered = false; 
+        printusage();
       }
     }
   }
 
+}
+
+
+void printusage() {
+  Serial.printf("--------------\n");
+  Serial.printf("0: kick and snare (0..5)\n");
+  Serial.printf("\t\t0:off\t\t1:kick\t\t2:kick+snare\t\t3:breakbeat\t\t4:halftime\t\t5:snare only\n");
+  Serial.printf("1: hihats (0..5)\n");
+  Serial.printf("\t\t0:off\t\t1:sync\t\t2:8\t\t\t3:16\t\t\t4:4x4\t\t\t5:.xxx\n");
+  Serial.printf("2: bass (0..3)\n");
+  Serial.printf("\t\t0:off\t\t1:sync\t\t2:w/slide\t\t3:.xxx\n");
+  Serial.printf("3: effects(0..1)\n");
+  Serial.printf("\t\t0:off\t\t1:fx\n");
 }
 
 unsigned __exidx_start;
