@@ -6,6 +6,12 @@
 #include "common/songposition.h"
 #include "common/tempo.h"
 #include "common/looptype.h"
+#include <USBHost_t36.h>
+
+USBHost myusb;
+USBHub hub1(myusb);
+USBHub hub2(myusb);
+MIDIDevice midi1(myusb);
 
 tempo tempo(120.0f);
 
@@ -148,6 +154,7 @@ sequencer *basssequencer;
 sequencer *fxsequencer;
 
 void setup() {
+  AudioNoInterrupts();  // disable audio library momentarily
   AudioMemory(80);
   Serial.begin(9600);    
   
@@ -159,7 +166,11 @@ void setup() {
       }
   }
 
-  AudioNoInterrupts();  // disable audio library momentarily
+  myusb.begin();
+  midi1.setHandleNoteOn(myNoteOn);
+  midi1.setHandleNoteOff(myNoteOff);
+  midi1.setHandleControlChange(myControlChange);
+  
   // put your setup code here, to run once:
   //cs42448_1.setAddress(0);
   cs42448_1.enable();
@@ -297,7 +308,6 @@ void setup() {
      
   multisequencer.start(millis());
   printusage();
-
 }
 int count = 0;
 
@@ -305,6 +315,10 @@ String inputChannel="", inString = "";
 bool inputChannelEntered = false;
 
 void loop() {
+  myusb.Task();
+  midi1.read();
+    
+  
   // put your main code here, to run repeatedly:
   multisequencer.tick(millis());
   
@@ -355,6 +369,57 @@ void loop() {
 
 }
 
+
+void myNoteOn(byte channel, byte note, byte velocity) {
+  // When a USB device with multiple virtual cables is used,
+  // midi1.getCable() can be used to read which of the virtual
+  // MIDI cables received this message.
+  //Serial.print("Note On, ch=");
+  //Serial.print(channel, DEC);
+  //Serial.print(", note=");
+  //Serial.print(note, DEC);
+  //Serial.print(", velocity=");
+  //Serial.println(velocity, DEC);
+
+  sequencer *sequencer = NULL;
+  switch (channel) {
+    case 1: sequencer = beatsequencer; break;
+    case 2: sequencer = hatsequencer; break;
+    case 3: sequencer = basssequencer; break;
+    case 4: sequencer = fxsequencer; break;
+    default: break;
+  }
+
+  if (sequencer != NULL) {
+    Serial.printf("set next pattern: %d - channel: %d\n", note - 53, channel);
+     sequencer->setNextPattern(note - 53);
+  }
+}
+
+void myNoteOff(byte channel, byte note, byte velocity) {
+  Serial.print("Note Off, ch=");
+  Serial.print(channel, DEC);
+  Serial.print(", note=");
+  Serial.print(note, DEC);
+  Serial.print(", velocity=");
+  Serial.println(velocity, DEC);
+  for (int i=0; i<5;i++)
+    midi1.sendNoteOff(53+i, 0, channel);
+  midi1.sendNoteOn(note, 127, channel);
+}
+
+void myControlChange(byte channel, byte control, byte value) {
+  Serial.print("Control Change, ch=");
+  Serial.print(channel, DEC);
+  Serial.print(", control=");
+  Serial.print(control, DEC);
+  Serial.print(", value=");
+  Serial.println(value, DEC);
+}
+
+void akaiLED(byte channel, byte pattern, bool on) {
+  midi1.sendNoteOn(53+pattern, (on)? 127 : 0, channel);
+}
 
 void printusage() {
   Serial.printf("--------------\n");

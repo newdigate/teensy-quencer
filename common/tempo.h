@@ -8,7 +8,7 @@
 
 struct tempo {
     unsigned long _milliseconds_per_64th = 0;
-    float _beats_per_minute = 120.0f;
+    float _beats_per_minute = 140.0f;
 
     tempo(float beats_per_minute) {
         _beats_per_minute = beats_per_minute;
