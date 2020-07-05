@@ -3,18 +3,18 @@ my attemp to make a little sequencer using teensy audio library... work in progr
 
 ## code
 * define multisequencer:
-```
+``` c
 tempo tempo(120.0f);
 multisequencer multisequencer(tempo);
 ```
 
 * add sequencer channel:
-```
+``` c
   sequencer *sequencer = multisequencer.newSequencer();
 ```
 
 * add event callbacks:
-```
+``` c
   sequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
         case 0: triggerAudioEvent(event, playSdRaw1, "KICK.WAV"); break;
