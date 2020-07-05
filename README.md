@@ -24,25 +24,19 @@ multisequencer multisequencer(tempo);
   };
 ```
 * add pattern:
-```
+``` c
 
   //                        !               !               !               !      
   const char* pattern4x4 = "X...X...X...X...X...X...X...X...X...X...X...X...X...X...X...X..."; 
   const char* patternSnr = "....x.......x.......x.......x.......x.......x.......x.......x..."; 
 
-  int pattern = 0;
-
-  sequencer->addPattern(); // empty pattern
-  pattern++;
-  
-  beatsequencer->addPattern(); // kick solo 4 x 4
+  int pattern = sequencer->addPattern(4); // empty pattern: 4 bars;
+  pattern = sequencer->addPattern(4); // kick solo 4 x 4: 4 bars
   readPattern(0, pattern, pattern4x4, sequencer); //kick
-  pattern++;
 
-  beatsequencer->addPattern(); // kick solo 4 x 4 + snare
+  pattern = sequencer->addPattern(4); // kick solo 4 x 4 + snare: 4 bars;
   readPattern(0, pattern, pattern4x4, sequencer); //kick
   readPattern(1, pattern, patternSnr, sequencer); //snare
-  pattern++;
 ```
 
 ## compiling for teensy
