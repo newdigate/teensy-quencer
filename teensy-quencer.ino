@@ -13,47 +13,42 @@ USBHub hub1(myusb);
 USBHub hub2(myusb);
 MIDIDevice midi1(myusb);
 
-tempo tempo(120.0f);
+tempo tempo(132.0f);
 
 multisequencer multisequencer(tempo);
 
 // GUItool: begin automatically generated code
-AudioPlaySdWav           playSdRaw6;     //xy=180,429
 AudioPlaySdWav           playSdRaw1;     //xy=278,158
-AudioFilterStateVariable filter1;        //xy=289,544
 AudioPlaySdWav           playSdRaw5;     //xy=310,372
+AudioPlaySdWav           playSdRaw6;     //xy=333,438
 AudioPlaySdWav           playSdRaw4;     //xy=405,309
 AudioPlaySdWav           playSdRaw3;     //xy=409,264
 AudioPlaySdWav           playSdRaw2;     //xy=410,227
 AudioEffectBitcrusher    bitcrusher1;    //xy=452,120
-AudioEffectDelay         delay1;         //xy=528,566
 AudioMixer4              mixer7;         //xy=634,368
 AudioMixer4              mixer3;         //xy=645,270
 AudioMixer4              mixer2;         //xy=838,416
 AudioMixer4              mixer1;         //xy=860,302
 AudioOutputTDM           tdm3;           //xy=1147,355
-AudioConnection          patchCord1(playSdRaw6, 0, filter1, 0);
-AudioConnection          patchCord2(playSdRaw1, 0, bitcrusher1, 0);
-AudioConnection          patchCord3(filter1, 1, mixer7, 1);
-AudioConnection          patchCord4(filter1, 2, delay1, 0);
-AudioConnection          patchCord5(playSdRaw5, 0, mixer7, 0);
-AudioConnection          patchCord6(playSdRaw4, 0, mixer3, 3);
-AudioConnection          patchCord7(playSdRaw3, 0, mixer3, 2);
-AudioConnection          patchCord8(playSdRaw2, 0, mixer3, 1);
-AudioConnection          patchCord9(bitcrusher1, 0, mixer3, 0);
-AudioConnection          patchCord10(delay1, 1, mixer7, 2);
-AudioConnection          patchCord11(mixer7, 0, mixer1, 2);
-AudioConnection          patchCord12(mixer7, 0, mixer2, 1);
-AudioConnection          patchCord13(mixer3, 0, mixer1, 0);
-AudioConnection          patchCord14(mixer3, 0, mixer2, 0);
-AudioConnection          patchCord15(mixer2, 0, tdm3, 2);
-AudioConnection          patchCord16(mixer2, 0, tdm3, 6);
-AudioConnection          patchCord17(mixer2, 0, tdm3, 10);
-AudioConnection          patchCord18(mixer2, 0, tdm3, 14);
-AudioConnection          patchCord19(mixer1, 0, tdm3, 0);
-AudioConnection          patchCord20(mixer1, 0, tdm3, 4);
-AudioConnection          patchCord21(mixer1, 0, tdm3, 8);
-AudioConnection          patchCord22(mixer1, 0, tdm3, 12);
+AudioConnection          patchCord1(playSdRaw1, 0, bitcrusher1, 0);
+AudioConnection          patchCord2(playSdRaw5, 0, mixer7, 0);
+AudioConnection          patchCord3(playSdRaw6, 0, mixer7, 2);
+AudioConnection          patchCord4(playSdRaw4, 0, mixer3, 3);
+AudioConnection          patchCord5(playSdRaw3, 0, mixer3, 2);
+AudioConnection          patchCord6(playSdRaw2, 0, mixer3, 1);
+AudioConnection          patchCord7(bitcrusher1, 0, mixer3, 0);
+AudioConnection          patchCord8(mixer7, 0, mixer1, 2);
+AudioConnection          patchCord9(mixer7, 0, mixer2, 1);
+AudioConnection          patchCord10(mixer3, 0, mixer1, 0);
+AudioConnection          patchCord11(mixer3, 0, mixer2, 0);
+AudioConnection          patchCord12(mixer2, 0, tdm3, 2);
+AudioConnection          patchCord13(mixer2, 0, tdm3, 6);
+AudioConnection          patchCord14(mixer2, 0, tdm3, 10);
+AudioConnection          patchCord15(mixer2, 0, tdm3, 14);
+AudioConnection          patchCord16(mixer1, 0, tdm3, 0);
+AudioConnection          patchCord17(mixer1, 0, tdm3, 4);
+AudioConnection          patchCord18(mixer1, 0, tdm3, 8);
+AudioConnection          patchCord19(mixer1, 0, tdm3, 12);
 AudioControlCS42448      cs42448_1;      //xy=853,560
 // GUItool: end automatically generated code
 
@@ -180,6 +175,23 @@ void setup() {
 
   bitcrusher1.bits(16);
 
+  while (!midi1) {
+    Serial.printf("waiting for akai APC40...\n");
+    delay(100);
+  }
+  // turn off all leds on the akai AP40
+  for (int j=0; j<8;j++)
+    for (int i=0; i<5;i++)
+      midi1.sendNoteOff(53+i, 0, j+1);
+
+  multisequencer.onloopchange = [&] (long channel, long pattern) {
+    Serial.printf("channel %d, pattern changed to %d\n", channel, pattern);
+    for (int i=0; i<5;i++)
+      midi1.sendNoteOff(53+i, 0, channel+1);
+
+    midi1.sendNoteOn(53 + pattern, 1, channel+1);  // green
+  };
+
   beatsequencer = multisequencer.newSequencer();
   hatsequencer = multisequencer.newSequencer();
   basssequencer = multisequencer.newSequencer();
@@ -223,93 +235,77 @@ void setup() {
   int pattern = 0;
   
   // beatsequencer
-  beatsequencer->addPattern(); // no beat
-  pattern++;
+  pattern = beatsequencer->addPattern(4); // no beat
   
-  beatsequencer->addPattern(); // kick solo 4 x 4
+  pattern = beatsequencer->addPattern(4); // kick solo 4 x 4
   readPattern(0, pattern, pattern4x4, beatsequencer); //kick
-  pattern++;
 
-  beatsequencer->addPattern(); // kick solo 4 x 4 + snare
+  pattern = beatsequencer->addPattern(4); // kick solo 4 x 4 + snare
   readPattern(0, pattern, pattern4x4, beatsequencer); //kick
   readPattern(1, pattern, patternSnr, beatsequencer); //snare
-  pattern++;
 
-  beatsequencer->addPattern(); // breakbeat
+  pattern = beatsequencer->addPattern(4); // breakbeat
   readPattern(0, pattern, pattern1c, beatsequencer); //kick
   readPattern(1, pattern, patternSnr, beatsequencer); //snare
   pattern++;
 
-  beatsequencer->addPattern(); // half-time
+  pattern = beatsequencer->addPattern(4); // half-time
   readPattern(0, pattern, pathalf4x4, beatsequencer); //kick
   readPattern(1, pattern, pathalfSyn, beatsequencer); //snare
   pattern++;
 
-  beatsequencer->addPattern(); // snare solo
+  pattern = beatsequencer->addPattern(4); // snare solo
   readPattern(1, pattern, patternSnr, beatsequencer); //snare
 
   
   
   // hatsequencer
-  pattern = 0;
-  hatsequencer->addPattern(); // no hats
-  pattern++;
- 
-  hatsequencer->addPattern();
+  pattern = hatsequencer->addPattern(4); // no hats
+
+  pattern = hatsequencer->addPattern(4);
   readPattern(0, pattern, patternSyn, hatsequencer); // syncopated
-  pattern++;
   
-  hatsequencer->addPattern();
+  pattern = hatsequencer->addPattern(4);
   readPattern(0, pattern, pattern8x4, hatsequencer); // 8 x 4
-  pattern++;
-  
-  hatsequencer->addPattern();
+
+  pattern = hatsequencer->addPattern(4);
   readPattern(0, pattern, pattern164, hatsequencer); // 16 x 4
-  pattern++;
 
-  hatsequencer->addPattern();
+  pattern = hatsequencer->addPattern(4);
   readPattern(0, pattern, pathalf4x4, hatsequencer); // 4 x 4
-  pattern++;
 
-  hatsequencer->addPattern();
+  pattern = hatsequencer->addPattern(4);
   readPattern(0, pattern, pattern3x4, hatsequencer); // 3 x 4
-
-
 
  
   // basssequencer
-  pattern = 0;
-  basssequencer->addPattern(); // no bass
-  pattern++;
+  pattern = basssequencer->addPattern(4); // no bass
 
-  basssequencer->addPattern(); // syncopated
+  pattern = basssequencer->addPattern(4); // syncopated
   readPattern(0, pattern, patternSyn, basssequencer); // bass
-  pattern++;
 
-  basssequencer->addPattern(); // syncopated, with last as slide
+  pattern = basssequencer->addPattern(4); // syncopated, with last as slide
   readPattern(0, pattern, xpattern0, basssequencer); // 3 x 4
   readPattern(1, pattern, xpattern1, basssequencer); 
-  pattern++;
-
-  basssequencer->addPattern(); // syncopated, with last as slide
+  
+  pattern = basssequencer->addPattern(4); // syncopated, with last as slide
   readPattern(0, pattern, pattern2a, basssequencer); // .xxx.xxx.xxx.xxx
   readPattern(1, pattern, xpattern1, basssequencer); 
 
 
 
   //fxsequencer
-  pattern = 0;
-  fxsequencer->addPattern(); // no fx
-  pattern++;
+  pattern = fxsequencer->addPattern(4); // no fx
 
-  fxsequencer->addPattern(); // inbetween fx
+  pattern = fxsequencer->addPattern(4); // inbetween fx
   readPattern(0, pattern, xpattern2, fxsequencer); // fx
-  pattern++;
      
+
+  
   multisequencer.start(millis());
   printusage();
+  delay(1000);
 }
-int count = 0;
 
 String inputChannel="", inString = ""; 
 bool inputChannelEntered = false;
@@ -322,13 +318,6 @@ void loop() {
   // put your main code here, to run repeatedly:
   multisequencer.tick(millis());
   
-  count++;
-  if (count > 100000) {
-    //sequencer.writescore(0);
-    //
-    count = 0;
-  }
-
 
   while (Serial.available()) {
     char inChar = Serial.read();   
@@ -403,18 +392,24 @@ void myNoteOff(byte channel, byte note, byte velocity) {
   Serial.print(note, DEC);
   Serial.print(", velocity=");
   Serial.println(velocity, DEC);
-  for (int i=0; i<5;i++)
-    midi1.sendNoteOff(53+i, 0, channel);
-  midi1.sendNoteOn(note, 127, channel);
+
+  midi1.sendNoteOn(note, 2, channel);
 }
 
 void myControlChange(byte channel, byte control, byte value) {
+  
   Serial.print("Control Change, ch=");
   Serial.print(channel, DEC);
   Serial.print(", control=");
   Serial.print(control, DEC);
   Serial.print(", value=");
   Serial.println(value, DEC);
+
+  if (control == 48) {
+    float newBPM = 100.0f + value/2.0f;
+    Serial.printf("BPM: %f\n",newBPM);
+    tempo.setBeatsPerMinute(newBPM);
+  }
 }
 
 void akaiLED(byte channel, byte pattern, bool on) {

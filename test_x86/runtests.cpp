@@ -27,7 +27,7 @@ void first_test() {
         Serial.printf("----- %d:%d:%4f\n", event->channel, event->isNoteStartEvent, event->rate);
     };
 
-    sequencer.addPattern();
+    sequencer.addPattern(4);
 
     for (int i=0; i < 16; i++) {
       loopelement *kick = new loopelement();
@@ -93,7 +93,7 @@ void second_test() {
         Serial.printf("----- %d:%d:%4f\n", event->channel, event->isNoteStartEvent, event->rate);
     };
 
-    sequencer->addPattern();
+    sequencer->addPattern(4);
 
     for (int i=0; i < 16; i++) {
       loopelement *kick = new loopelement();

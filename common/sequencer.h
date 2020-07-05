@@ -8,6 +8,7 @@
 #include <set>
 #include <vector>
 #include <functional>
+#include <algorithm>
 
 #include "tempo.h"
 #include "songposition.h"
@@ -68,10 +69,10 @@ public:
 
             unsigned long totalSixtyFourth = _position->totalSixtyFourth;
             bool wrapped = false;
-            if (_position->bar > _loop_duration_bars) {
-                _position->bar %= _loop_duration_bars;
-                _position->sixtyFourth %= 64 * 4 *  _loop_duration_bars;
-                _position->totalSixtyFourth %= 64 * 4 * _loop_duration_bars;
+            if (_position->bar > _loop_duration_bars[_currentPattern]) {
+                _position->bar %= _loop_duration_bars[_currentPattern];
+                _position->sixtyFourth %= 64 * 4 *  _loop_duration_bars[_currentPattern];
+                _position->totalSixtyFourth %= 64 * 4 * _loop_duration_bars[_currentPattern];
                 wrapped = true;
             }
         
@@ -88,7 +89,10 @@ public:
 
             if (wrapped) {
                 _last_event_index = 0;
-                _currentPattern = _nextPattern;
+                if (_currentPattern != _nextPattern) {
+                    _currentPattern = _nextPattern;
+                    onloopchange(this, _nextPattern);
+                }
             }
         }
     }
@@ -96,7 +100,7 @@ public:
     void start(unsigned long millis) {
         if (!_playing) {
             if (_numPatterns == 0)
-                addPattern();
+                addPattern(4);
             _previousMilliseconds = millis;
             _lastSixtyFourthMillis = _previousMilliseconds;
             _last_event_index = 0;
@@ -105,6 +109,7 @@ public:
     }
 
     std::function<void(sequencerevent *event)> onevent;
+    std::function<void(sequencer *sequencer, int newPattern)> onloopchange;
 
     void writescore(unsigned pattern) {
         if (pattern >= _numPatterns) return;
@@ -141,16 +146,18 @@ public:
         }
     }
 
-
-
-    void addPattern() {
+    unsigned int addPattern(unsigned numBars) {
         vector<loopelement*> *elementsForPattern = new vector<loopelement*>();
         _elements.push_back(elementsForPattern);
 
         vector<sequencerevent*> *sortedEventsForPattern = new vector<sequencerevent*>();
         _sorted_events.push_back(sortedEventsForPattern);
 
+        _loop_duration_bars.push_back(numBars);
+
+        unsigned int result = _numPatterns;
         _numPatterns++;
+        return result;
     }
 
     void setNextPattern(unsigned nextPattern) {
@@ -203,10 +210,9 @@ private:
     unsigned long _lastSixtyFourthMillis = 0;
     unsigned long _milliseconds = 0;
     unsigned long _previousMilliseconds = 0;
-    int _loop_duration_bars = 4;
+    vector<unsigned int> _loop_duration_bars;
     vector< vector<loopelement*> * > _elements;
     vector< vector<sequencerevent*> * > _sorted_events;
-    
 
     int _last_event_index = 0;
 };
@@ -221,9 +227,23 @@ public:
     sequencer* newSequencer() {
         songposition *p = new songposition();
         sequencer *result = new sequencer(_tempo, p);
+        result->onloopchange = [&] (sequencer *sequencer, int newPattern) {
+            long index = indexOf(sequencer);
+            onloopchange(index, newPattern);
+        };
         _sequencers.push_back(result);
         _numSequencers++;
         return result;
+    }
+
+    long indexOf(sequencer *sequencer) {
+        auto itr = std::find(_sequencers.begin(), _sequencers.end(), sequencer);
+        if (itr != _sequencers.cend()) {
+            return std::distance(_sequencers.begin(), itr);
+        }
+        else {
+            return -1;
+        }
     }
 
     void start(unsigned millis) {
@@ -239,10 +259,12 @@ public:
             s->tick(millis);
         }
     }
+    std::function<void(long channel, long pattern)> onloopchange;
 
 private:
     tempo &_tempo;
     unsigned _numSequencers = 0;
     vector<sequencer*> _sequencers;
+
 };
 #endif //TEENSYSEQUENCER_SEQUENCER_H
