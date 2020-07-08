@@ -8,6 +8,13 @@
 #include "common/looptype.h"
 #include <USBHost_t36.h>
 
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <ST7735_t3.h> // Hardware-specific library
+#define TFT_CS   6  // CS & DC can use pins 2, 6, 9, 10, 15, 20, 21, 22, 23
+#define TFT_DC    2  //  but certain pairs must NOT be used: 2+10, 6+9, 20+23, 21+22
+#define TFT_RST   0 // RST can use any pin
+ST7735_t3 tft = ST7735_t3(TFT_CS, TFT_DC, TFT_RST);
+
 USBHost myusb;
 USBHub hub1(myusb);
 USBHub hub2(myusb);
@@ -151,14 +158,23 @@ sequencer *fxsequencer;
 void setup() {
   AudioNoInterrupts();  // disable audio library momentarily
   AudioMemory(80);
+
+  SPI.begin();
+  tft.initR(INITR_GREENTAB);
+  tft.setRotation(3);
+  
+  tft.fillScreen(ST7735_BLACK);
+  tft.println("init..."); 
+  
   Serial.begin(9600);    
   
-  if (!(SD.begin(BUILTIN_SDCARD))) {
+  while (!(SD.begin(BUILTIN_SDCARD))) {
       // stop here if no SD card, but print a message
-      while (1) {
-          Serial.println("Unable to access the SD card");
-          delay(500);
-      }
+        tft.fillScreen(ST7735_BLACK);
+        tft.setCursor(0,0);
+        tft.println("Unable to access the SD card");
+        Serial.println("Unable to access the SD card");
+        delay(1000);
   }
 
   myusb.begin();
@@ -176,9 +192,16 @@ void setup() {
   bitcrusher1.bits(16);
 
   while (!midi1) {
-    Serial.printf("waiting for akai APC40...\n");
-    delay(100);
+    tft.fillScreen(ST7735_BLACK);
+    tft.setCursor(0,0);
+    tft.println("waiting for akai APC40...");
+    Serial.println("waiting for akai APC40...");
+    delay(1000);
   }
+  tft.fillScreen(ST7735_BLACK);
+  tft.setCursor(0,0);
+  tft.println("connected to APC40...");
+    
   // turn off all leds on the akai AP40
   for (int j=0; j<8;j++)
     for (int i=0; i<5;i++)
@@ -200,7 +223,7 @@ void setup() {
   beatsequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
         case 0: triggerAudioEvent(event, playSdRaw1, "KICK.WAV"); break;
-        case 1: triggerAudioEvent(event, playSdRaw2, "SNARE.WAV"); break;      
+        case 1: triggerAudioEvent(event, playSdRaw2, "CLAP.WAV"); break;      
         default: break;
       }
   };
