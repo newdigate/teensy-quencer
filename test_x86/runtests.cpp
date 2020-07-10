@@ -61,7 +61,7 @@ void first_test() {
 
     sequencer.writescore(0);
   //return;
-    sequencer.start(millis());
+    sequencer.start(micros());
    // sequencer.tick(0);
    // sequencer.tick(250);
   //  sequencer.tick(500);
@@ -71,12 +71,12 @@ void first_test() {
   //  sequencer.tick(1500);
 
     while (true) {
-       sequencer.tick(millis());
+       sequencer.tick(micros());
        //Serial.printf("%d:%d:%4f\n", position.bar, position.beat, position.sixtyFourth / 64.0f);
        delay(5);
     }
     for (int i=0; i<8; i++) {
-       sequencer.tick(millis());
+       sequencer.tick(micros());
        delay(20);
     }
 }
@@ -127,7 +127,7 @@ void second_test() {
 
     sequencer->writescore(0);
   //return;
-    multisequencer.start(millis());
+    multisequencer.start(micros());
    // sequencer.tick(0);
    // sequencer.tick(250);
   //  sequencer.tick(500);
@@ -137,7 +137,7 @@ void second_test() {
   //  sequencer.tick(1500);
 
     while (true) {
-       multisequencer.tick(millis());
+       multisequencer.tick(micros());
        //Serial.printf("%d:%d:%4f\n", position.bar, position.beat, position.sixtyFourth / 64.0f);
        delay(5);
     }

@@ -27,8 +27,8 @@ typedef unsigned char byte;
 typedef unsigned short int word;
 
 unsigned long millis();
+unsigned long micros();
 void delay(unsigned long ms);
-unsigned long millis();
 
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
 #define bitSet(value, bit) ((value) |= (1UL << (bit)))

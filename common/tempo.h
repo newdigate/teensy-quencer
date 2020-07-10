@@ -8,20 +8,25 @@
 
 struct tempo {
     unsigned long _milliseconds_per_64th = 0;
+    unsigned long _microseconds_per_64th = 0;
+
     float _beats_per_minute = 140.0f;
 
     tempo(float beats_per_minute) {
         _beats_per_minute = beats_per_minute;
         _milliseconds_per_64th = get_milliseconds_per_tick();
+        _microseconds_per_64th = get_microseconds_per_tick();
     }
 
     tempo() {
         _milliseconds_per_64th = get_milliseconds_per_tick();
+        _microseconds_per_64th = get_microseconds_per_tick();
     }
 
     void setBeatsPerMinute(float beats_per_minute) {
         _beats_per_minute = beats_per_minute;
         _milliseconds_per_64th = get_milliseconds_per_tick();
+        _microseconds_per_64th = get_microseconds_per_tick();
     }
 
     unsigned int get_milliseconds_per_tick() {
@@ -29,6 +34,13 @@ struct tempo {
         unsigned int millis_per_beat = seconds_per_beat * 1000.0f;
         unsigned int millis_per_tick = millis_per_beat / 64;
         return millis_per_tick;
+    }
+
+    unsigned int get_microseconds_per_tick() {
+        double seconds_per_beat = 60.0 / _beats_per_minute;
+        unsigned int micros_per_beat = seconds_per_beat * 1000000.0;
+        unsigned int micros_per_tick = micros_per_beat / 64;
+        return micros_per_tick;
     }
 };
 

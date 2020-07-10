@@ -47,15 +47,15 @@ class sequencer {
 public:
     sequencer(tempo &tempo, songposition *position) : _tempo(tempo), _position(position) {}
 
-    void tick(unsigned long millisecs) {
+    void tick(unsigned long micros) {
         if (!_playing) return;
-        _milliseconds = millisecs;
+        _microseconds = micros;
 
-        unsigned long deltaMillis = _milliseconds - _lastSixtyFourthMillis;
-        if (deltaMillis >= _tempo._milliseconds_per_64th) {
-            _lastSixtyFourthMillis = millisecs;
+        unsigned long deltaMicros = _microseconds - _lastSixtyFourthMicroseconds;
+        if (deltaMicros >= _tempo._microseconds_per_64th) {
+            _lastSixtyFourthMicroseconds = _microseconds;
 
-            unsigned long deltaSixtyFourths = deltaMillis / _tempo._milliseconds_per_64th;
+            unsigned long deltaSixtyFourths = deltaMicros / _tempo._microseconds_per_64th;
             _position->sixtyFourth += deltaSixtyFourths;
             _position->totalSixtyFourth += deltaSixtyFourths;
             if (_position->sixtyFourth >= 64) {
@@ -97,12 +97,12 @@ public:
         }
     }
 
-    void start(unsigned long millis) {
+    void start(unsigned long micros) {
         if (!_playing) {
             if (_numPatterns == 0)
                 addPattern(4);
-            _previousMilliseconds = millis;
-            _lastSixtyFourthMillis = _previousMilliseconds;
+            _previousMicroseconds = micros;
+            _lastSixtyFourthMicroseconds = _previousMicroseconds;
             _last_event_index = 0;
             _playing = true;
         }
@@ -207,9 +207,9 @@ private:
     unsigned _nextPattern = 0;
 
     unsigned long _sixtyFourth = 0;
-    unsigned long _lastSixtyFourthMillis = 0;
-    unsigned long _milliseconds = 0;
-    unsigned long _previousMilliseconds = 0;
+    unsigned long _lastSixtyFourthMicroseconds = 0;
+    unsigned long _microseconds = 0;
+    unsigned long _previousMicroseconds = 0;
     vector<unsigned int> _loop_duration_bars;
     vector< vector<loopelement*> * > _elements;
     vector< vector<sequencerevent*> * > _sorted_events;
