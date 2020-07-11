@@ -1,5 +1,7 @@
 # teensyquencer
-my attemp to make a little sequencer using teensy audio library... work in progress!!!
+A simple ableton-like loop sequencer using akai apc40 controller to select patterns. 
+
+![Audio signal path](AudioPath.png)
 
 https://youtu.be/eEeuXfxMdCI
 
