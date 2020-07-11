@@ -3,7 +3,7 @@ A simple ableton-like loop sequencer using akai apc40 controller to select patte
 
 ![Audio signal path](AudioPath.png)
 
-https://youtu.be/eEeuXfxMdCI
+[![teensy-quencer on youtube](https://img.youtube.com/vi/eEeuXfxMdCI/0.jpg)](https://www.youtube.com/watch?v=eEeuXfxMdCI)
 
 ## code
 * define multisequencer:
