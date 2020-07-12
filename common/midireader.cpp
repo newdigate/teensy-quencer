@@ -65,9 +65,10 @@ bool midireader::open(const char *filename) {
         _midifile.read(buffer, 4);
         auto track_length = static_cast<unsigned long>(buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3]);;
 
-        _track_offset[i] = _midifile.position();
-        _track_size[i] = track_length;
+        _track_offset.push_back(_midifile.position());
+        _track_size.push_back(track_length);
         _midifile.seek(_track_offset[i] + track_length);
+        _numTracks++;
     }
 
     _pulses_per_quater_note = header.division;

@@ -147,20 +147,30 @@ void second_test() {
 
 void midireader_test() {
 
-    std::string mockSDCardPath = std::string("/Users/nicholasnewdigate/Development/SD");
-    SDClass::setSDCardFolderPath(mockSDCardPath);
+    std::fstream mockFile = std::fstream();
+    mockFile.open("/Users/xxx/Development/SD/Dread.mid", ios::in|ios::binary|ios::ate);
+    if (mockFile.is_open()) {
+      char *buffer;
+      streampos bytesRead = mockFile.tellg();
+      buffer = new char[bytesRead];
+      mockFile.seekg (0, ios::beg);
+      mockFile.read(buffer, bytesRead);
 
-    midireader reader;
-    reader.open("Dread.mid");
-    for (int i=0; i<reader.getNumTracks(); i++) {
-        midimessage message;
-        reader.setTrackNumber(i);
-        while (reader.read(message)) {
-            Serial.printf("status: %x, channel:&x\n", message.status, message.channel);
-        }
-        Serial.printf("track end;\n");
+      SD.setSDCardFileData(buffer, bytesRead);
+
+      midireader reader;
+      reader.open("Dread.mid");
+      for (int i=0; i<reader.getNumTracks(); i++) {
+          midimessage message;
+          reader.setTrackNumber(i);
+          while (reader.read(message)) {
+              Serial.printf("status: %x, channel:&x\n", message.status, message.channel);
+          }
+          Serial.printf("track end;\n");
+      }
+      Serial.printf("song end");
+
     }
-    Serial.printf("song end");
 }
 
 void millis_test() {
