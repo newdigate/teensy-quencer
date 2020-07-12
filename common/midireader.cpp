@@ -66,7 +66,7 @@ bool midireader::open(const char *filename) {
         auto track_length = static_cast<unsigned long>(buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3]);;
 
         _track_offset.push_back(_midifile.position());
-        _track_size.push_back(track_length);
+        _track_size.push_back(track_length-4);
         _midifile.seek(_track_offset[i] + track_length);
         _numTracks++;
     }
@@ -88,7 +88,8 @@ void midireader::readMetaText() {
     uint16_t progress = 0;
     uint32_t length = varfieldGet(_midifile, progress);
     _currentTrackOffset += progress;
-    char *text = new char[length];
+    char *text = new char[length+1];
+    text[length] = 0;
     _midifile.read(text, length);
     Serial.printf("text: ");
     Serial.print(text);
@@ -105,23 +106,21 @@ bool midireader::read(midimessage &midiMessage) {
         uint8_t channel = 0;
         unsigned char status_byte = 0;
 
-        //Serial.printf("position: %d\n", _track_position[i] + _track_offset[i]);
-
-        uint16_t progress = 0;
-        uint32_t delta_ticks = varfieldGet(_midifile, progress);
-        _currentTrackOffset += progress;
-
-        unsigned char new_status_byte[1];
-        _midifile.read(new_status_byte, 1);
-
-        bool running_status = false;
-        if (new_status_byte[0] >= 0x80) {
-            status_byte = new_status_byte[0];
-            channel = new_status_byte[0] & 0x0f;
-        } else
-            running_status = true;
-
         while (_currentTrackOffset < _track_size[_current_track]) {
+
+            uint16_t progress = 0;
+            uint32_t delta_ticks = varfieldGet(_midifile, progress);
+            _currentTrackOffset += progress;
+
+            unsigned char new_status_byte[1];
+            _midifile.read(new_status_byte, 1);
+
+            bool running_status = false;
+            if (new_status_byte[0] >= 0x80) {
+                status_byte = new_status_byte[0];
+                channel = new_status_byte[0] & 0x0f;
+            } else
+                running_status = true;
 
             unsigned char key, velocity, nextByte;
             uint32_t length = 0;
@@ -192,10 +191,32 @@ bool midireader::read(midimessage &midiMessage) {
                         _currentTrackOffset++;
 
                         switch (nextByte) {
-                            case 0x00: {// Sequence Number
-                                Serial.printf("sequence number:\n");
+                            case 0x00: {// Sequence Number                                
+                                uint8_t sequence_number = _midifile.read();
+                                _currentTrackOffset++;
+                                Serial.printf("sequence number: %d\n", sequence_number);
                                 break;
                             }
+                            case 0x01: {// Text event                                
+                                uint8_t text_length = _midifile.read();
+
+                                _currentTrackOffset++;
+                                char b[255];
+                                _midifile.read(b, text_length);
+                                _currentTrackOffset+= text_length;
+                                Serial.printf("text event: %s\n", b);
+                                break;
+                            }
+                            case 0x02: {// Copyright Notice                                
+                                uint8_t text_length = _midifile.read();
+
+                                _currentTrackOffset++;
+                                char b[255];
+                                _midifile.read(b, text_length);
+                                _currentTrackOffset+= text_length;
+                                Serial.printf("copywrite event: %s\n", b);
+                                break;
+                            }                       
                             case 0x2F: {
                                 // End of Track -> FF 2F 00
                                 uint8_t nn = _midifile.read();
@@ -269,18 +290,18 @@ bool midireader::read(midimessage &midiMessage) {
                             }
 
                             default: {
-                                if ((1 <= nextByte) && (nextByte <= 0x0F))
+                                if ((nextByte > 1) && (nextByte < 8))
                                     readMetaText();
                                 else {
                                     uint8_t nn = _midifile.read();
                                     _currentTrackOffset++;
-
+                                    Serial.printf("Meta - 0x%x 0x%x 0x%02x\n", status_byte, nextByte, nn);
                                     for (uint8_t jjj = 0; jjj < nn; jjj++) {
                                         uint8_t xx = _midifile.read();
                                         _currentTrackOffset++;
+                                         Serial.print((char)xx);
                                     }
-
-                                    Serial.printf("Meta - 0x%x 0x%x 0x%02x\n", status_byte, nextByte, nn);
+                                    Serial.println();
                                 }
                                 break;
                             }
