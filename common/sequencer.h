@@ -165,6 +165,10 @@ public:
         _nextPattern = nextPattern;
     }
 
+    void loadMidi(unsigned pattern, char *midiFileName) {
+        
+    }
+
     void addelement(unsigned pattern, loopelement *element) {
         if (pattern >= _numPatterns) return;
 

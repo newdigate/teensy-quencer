@@ -8,4 +8,4 @@ add_executable(testteensyquencer
         runtests.cpp)
 
 target_link_libraries(testteensyquencer teensy_cores_x86)
-#target_link_libraries(testteensyquencer common)
+target_link_libraries(testteensyquencer common)

@@ -4,17 +4,19 @@
 #include <unistd.h>
 #include <dirent.h>
 #include "../common/sequencer.h"
+#include "../common/midireader.h"
 using namespace std;
 
 void millis_test();
 void delay_test();
 void first_test();
 void second_test();
+void midireader_test();
 
 int main(int argc, char **argv){
     std::cout << "starting app...\n";
     initialize_mock_arduino();
-    second_test();
+    midireader_test();
     std::cout << "complete...\n";
 }
 
@@ -143,6 +145,23 @@ void second_test() {
     }
 }
 
+void midireader_test() {
+
+    std::string mockSDCardPath = std::string("/Users/nicholasnewdigate/Development/SD");
+    SDClass::setSDCardFolderPath(mockSDCardPath);
+
+    midireader reader;
+    reader.open("Dread.mid");
+    for (int i=0; i<reader.getNumTracks(); i++) {
+        midimessage message;
+        reader.setTrackNumber(i);
+        while (reader.read(message)) {
+            Serial.printf("status: %x, channel:&x\n", message.status, message.channel);
+        }
+        Serial.printf("track end;\n");
+    }
+    Serial.printf("song end");
+}
 
 void millis_test() {
   unsigned long start = millis();
