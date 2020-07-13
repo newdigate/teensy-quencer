@@ -13,7 +13,7 @@ void first_test();
 void second_test();
 void midireader_test();
 
-streampos readFileData(char *filename, char *&buffer);
+streampos readFileData(string filename, char *&buffer);
 
 int main(int argc, char **argv){
     std::cout << "starting app...\n";
@@ -147,27 +147,58 @@ void second_test() {
     }
 }
 
-void midireader_test() {
-    char *buffer;
-    streampos bytesRead = readFileData("/Users/nicholasnewdigate/Development/SD/Schubert.mid", buffer);
-    if (bytesRead > 0) {
-        SD.setSDCardFileData(buffer, bytesRead);
+void search(std::string curr_directory, std::string extension, vector<string> &results){
+	DIR* dir_point = opendir(curr_directory.c_str());
+	dirent* entry = readdir(dir_point);
+	while (entry){									// if !entry then end of directory
+		if (entry->d_type == DT_DIR){				// if entry is a directory
+			std::string fname = entry->d_name;
+			if (fname != "." && fname != "..")
+				search(entry->d_name, extension, results);	// search through it
+		}
+		else if (entry->d_type == DT_REG){		// if entry is a regular file
+			std::string fname = entry->d_name;	// filename
+      // if filename's last characters are extension
+			if (fname.find(extension, (fname.length() - extension.length())) != std::string::npos)
+				results.push_back(fname);		// add filename to results vector
+		}
+		entry = readdir(dir_point);
+	}
+	return;
+}
 
-        midireader reader;
-        reader.open("Dread.mid");
-        for (int i = 0; i < reader.getNumTracks(); i++) {
-            midimessage message;
-            reader.setTrackNumber(i);
-            while (reader.read(message)) {
-                //Serial.printf("status: %x, channel:%x\n", message.status, message.channel);
+void midireader_test() {
+    std::vector<std::string> midiFiles;				// holds search results
+    string midiFileDirectory = "/Users/xxx/Development/SD";
+    search(midiFileDirectory,"mid", midiFiles);
+
+    std::cout << midiFiles.size() << " files were found:" << std::endl;
+		for (unsigned int i = 0; i < midiFiles.size(); ++i)	 { // used unsigned to appease compiler warnings
+        std::cout << midiFiles[i] << std::endl;
+
+        char *buffer;
+        std::string midiFileName = midiFileDirectory + "/" + midiFiles[i];
+        streampos bytesRead = readFileData(midiFileName, buffer);
+        if (bytesRead > 0) {
+            SD.setSDCardFileData(buffer, bytesRead);
+
+            midireader reader;
+            reader.open("Dread.mid");
+            for (int i = 0; i < reader.getNumTracks(); i++) {
+                midimessage message;
+                reader.setTrackNumber(i);
+                while (reader.read(message)) {
+                    //Serial.printf("status: %x, channel:%x\n", message.status, message.channel);
+                }
+                Serial.printf("track end: %d;\n", i);
             }
-            Serial.printf("track end: %d;\n", i);
+            Serial.printf("song end");
         }
-        Serial.printf("song end");
+        delete buffer;
     }
 }
 
-streampos readFileData(char *filename, char *&buffer) {
+streampos readFileData(string filename, char *&buffer) {
     fstream mockFile = fstream();
     mockFile.open(filename, ios_base::in | ios_base::binary | ios_base::ate);
     if (mockFile.is_open()) {
