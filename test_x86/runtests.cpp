@@ -13,6 +13,8 @@ void first_test();
 void second_test();
 void midireader_test();
 
+streampos readFileData(char *filename, char *&buffer);
+
 int main(int argc, char **argv){
     std::cout << "starting app...\n";
     initialize_mock_arduino();
@@ -146,31 +148,36 @@ void second_test() {
 }
 
 void midireader_test() {
+    char *buffer;
+    streampos bytesRead = readFileData("/Users/nicholasnewdigate/Development/SD/Schubert.mid", buffer);
+    if (bytesRead > 0) {
+        SD.setSDCardFileData(buffer, bytesRead);
 
-    std::fstream mockFile = std::fstream();
-    mockFile.open("/Users/xxx/Development/SD/Dread.mid", ios::in|ios::binary|ios::ate);
-    if (mockFile.is_open()) {
-      char *buffer;
-      streampos bytesRead = mockFile.tellg();
-      buffer = new char[bytesRead];
-      mockFile.seekg (0, ios::beg);
-      mockFile.read(buffer, bytesRead);
-
-      SD.setSDCardFileData(buffer, bytesRead);
-
-      midireader reader;
-      reader.open("Dread.mid");
-      for (int i=0; i<reader.getNumTracks(); i++) {
-          midimessage message;
-          reader.setTrackNumber(i);
-          while (reader.read(message)) {
-              Serial.printf("status: %x, channel:&x\n", message.status, message.channel);
-          }
-          Serial.printf("track end;\n");
-      }
-      Serial.printf("song end");
-
+        midireader reader;
+        reader.open("Dread.mid");
+        for (int i = 0; i < reader.getNumTracks(); i++) {
+            midimessage message;
+            reader.setTrackNumber(i);
+            while (reader.read(message)) {
+                //Serial.printf("status: %x, channel:%x\n", message.status, message.channel);
+            }
+            Serial.printf("track end: %d;\n", i);
+        }
+        Serial.printf("song end");
     }
+}
+
+streampos readFileData(char *filename, char *&buffer) {
+    fstream mockFile = fstream();
+    mockFile.open(filename, ios_base::in | ios_base::binary | ios_base::ate);
+    if (mockFile.is_open()) {
+        streampos bytesRead = mockFile.tellg();
+        buffer = new char[bytesRead];
+        mockFile.seekg(0, ios_base::beg);
+        mockFile.read(buffer, bytesRead);
+        return bytesRead;
+    }
+    return 0;
 }
 
 void millis_test() {
