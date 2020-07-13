@@ -59,6 +59,7 @@ private:
     unsigned _numTracks = 0;
     vector<unsigned long> _track_size;
     vector<unsigned long> _track_offset;
+    unsigned char status_byte = 0;
 
     void readMetaText();
 

@@ -104,7 +104,6 @@ bool midireader::read(midimessage &midiMessage) {
         && _currentTrackOffset < _track_size[_current_track]) {
 
         uint8_t channel = 0;
-        unsigned char status_byte = 0;
 
         while (_currentTrackOffset < _track_size[_current_track]) {
 
@@ -319,6 +318,7 @@ bool midireader::read(midimessage &midiMessage) {
             }
         }
     }
+    return false;
 }
 
 uint32_t varfieldGet(File &file, uint16_t &progress)
