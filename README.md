@@ -1,7 +1,8 @@
 # teensyquencer
-A loop pattern sequencer for teensy
-* setting next pattern will take effect once current pattern is complete.
-* using akai apc40 controller to select patterns for channels
+A multi-channel loop pattern sequencer for teensy
+* each channel loops independently and own lenth
+* setting next pattern on a channel will take effect once current pattern on that channel is complete.
+* Im using an akai apc40 controller to select patterns for channels - please fork and adapt to your own controller...
 * comming soon - star this repo if you want to see these features
   * midi import and export
   * playing samples at different pitches
