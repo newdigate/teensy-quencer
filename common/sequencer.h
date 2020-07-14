@@ -137,9 +137,9 @@ public:
         for (int j=0; j < 8; j++) {
             for (int i=0; i < 80; i++) {
                 if (i % 16 == 0)
-                    Serial.print("|");
+                    Serial.print('|');
                 if (i % 4 == 0)
-                    Serial.print(" ");
+                    Serial.print(' ');
                 Serial.print(pixel[j][i]);
             }
             Serial.println();
