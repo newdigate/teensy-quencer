@@ -1,6 +1,12 @@
 # teensyquencer
-A simple ableton-like loop sequencer using akai apc40 controller to select patterns. 
-
+A loop pattern sequencer for teensy
+* setting next pattern will take effect once current pattern is complete.
+* using akai apc40 controller to select patterns for channels
+* comming soon - star this repo if you want to see these features
+  * midi import and export
+  * playing samples at different pitches
+  * parameter, midi, audio recording and playback
+ 
 ![Audio signal path](AudioPath.png)
 
 [![teensy-quencer on youtube](https://img.youtube.com/vi/eEeuXfxMdCI/0.jpg)](https://www.youtube.com/watch?v=eEeuXfxMdCI)
