@@ -1,10 +1,12 @@
-#include <stdint.h>
 #include <iostream>
 #include "SD/SD.h"
-#include <unistd.h>
 #include <dirent.h>
 #include "../common/sequencer.h"
 #include "../common/midireader.h"
+#include <cstdio>
+#include <pwd.h>
+#include <unistd.h>
+
 using namespace std;
 
 void millis_test();
@@ -13,7 +15,9 @@ void first_test();
 void second_test();
 void midireader_test();
 
-streampos readFileData(string filename, char *&buffer);
+streampos readFileData(const string& filename, char *&buffer);
+
+const char *getHomeDirectory();
 
 int main(int argc, char **argv){
     std::cout << "starting app...\n";
@@ -147,8 +151,12 @@ void second_test() {
     }
 }
 
-void search(std::string curr_directory, std::string extension, vector<string> &results){
+void search(const std::string& curr_directory, const std::string& extension, vector<string> &results){
 	DIR* dir_point = opendir(curr_directory.c_str());
+    if (!dir_point) {
+        cout << "Directory not found!!! " << curr_directory << "\n";
+        return;
+    }
 	dirent* entry = readdir(dir_point);
 	while (entry){									// if !entry then end of directory
 		if (entry->d_type == DT_DIR){				// if entry is a directory
@@ -169,36 +177,50 @@ void search(std::string curr_directory, std::string extension, vector<string> &r
 
 void midireader_test() {
     std::vector<std::string> midiFiles;				// holds search results
-    string midiFileDirectory = "/Users/xxx/Development/SD";
+
+    const char *homeDir = getHomeDirectory();
+
+    string midiFileDirectory = string(homeDir) + "/Development/SD";
     search(midiFileDirectory,"mid", midiFiles);
 
     std::cout << midiFiles.size() << " files were found:" << std::endl;
-		for (unsigned int i = 0; i < midiFiles.size(); ++i)	 { // used unsigned to appease compiler warnings
-        std::cout << midiFiles[i] << std::endl;
+    for (auto & midiFile : midiFiles) { // used unsigned to appease compiler warnings
+        std::cout << midiFile << std::endl;
 
         char *buffer;
-        std::string midiFileName = midiFileDirectory + "/" + midiFiles[i];
+        std::string midiFileName = midiFileDirectory + "/" + midiFile;
         streampos bytesRead = readFileData(midiFileName, buffer);
         if (bytesRead > 0) {
             SD.setSDCardFileData(buffer, bytesRead);
 
             midireader reader;
-            reader.open("Dread.mid");
+            reader.open(midiFile.c_str());
             for (int i = 0; i < reader.getNumTracks(); i++) {
-                midimessage message;
+                midimessage message {};
                 reader.setTrackNumber(i);
                 while (reader.read(message)) {
                     //Serial.printf("status: %x, channel:%x\n", message.status, message.channel);
                 }
                 Serial.printf("track end: %d;\n", i);
             }
-            Serial.printf("song end");
+            Serial.printf("song end\n");
+            delete buffer;
         }
-        delete buffer;
     }
 }
 
-streampos readFileData(string filename, char *&buffer) {
+const char *getHomeDirectory() {
+    const char *homeDir = getenv("HOME");
+    if (!homeDir) {
+        struct passwd* pwd = getpwuid(getuid());
+        if (pwd)
+           homeDir = pwd->pw_dir;
+    }
+    printf("Home directory is %s\n", homeDir);
+    return homeDir;
+}
+
+streampos readFileData(const string& filename, char *&buffer) {
     fstream mockFile = fstream();
     mockFile.open(filename, ios_base::in | ios_base::binary | ios_base::ate);
     if (mockFile.is_open()) {
@@ -206,6 +228,7 @@ streampos readFileData(string filename, char *&buffer) {
         buffer = new char[bytesRead];
         mockFile.seekg(0, ios_base::beg);
         mockFile.read(buffer, bytesRead);
+        mockFile.close();
         return bytesRead;
     }
     return 0;
