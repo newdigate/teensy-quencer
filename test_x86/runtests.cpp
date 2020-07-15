@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <pwd.h>
 #include <unistd.h>
+#include <math.h>
 
 using namespace std;
 
@@ -19,7 +20,14 @@ streampos readFileData(const string& filename, char *&buffer);
 
 const char *getHomeDirectory();
 
+double pitchFactor(uint8_t note) {
+    double result = pow(2.0, (note-60) / 12.0);
+    return result;
+}
+
 int main(int argc, char **argv){
+
+    double f = pitchFactor(60);
     std::cout << "starting app...\n";
     initialize_mock_arduino();
     midireader_test();

@@ -294,13 +294,13 @@ bool midireader::read(midimessage &midiMessage) {
                                 else {
                                     uint8_t nn = _midifile.read();
                                     _currentTrackOffset++;
-                                    Serial.printf("Meta - 0x%x 0x%x 0x%02x\n", status_byte, nextByte, nn);
+                                    //Serial.printf("Meta - 0x%x 0x%x 0x%02x\n", status_byte, nextByte, nn);
                                     for (uint8_t jjj = 0; jjj < nn; jjj++) {
                                         uint8_t xx = _midifile.read();
                                         _currentTrackOffset++;
-                                         Serial.print((char)xx);
+                                         //Serial.print((char)xx);
                                     }
-                                    Serial.println();
+                                    //Serial.println();
                                 }
                                 break;
                             }

@@ -27,14 +27,14 @@ struct loopelement {
     long start_tick = 0;
     long stop_tick = 0;
     looptype_x loopType = looptypex_none;
-    float rate = 1.0f;
+    double rate = 1.0;
 };
 
 struct sequencerevent {
     uint8_t channel = 0;
     long position = 0;
     bool isNoteStartEvent = true;
-    float rate = 1.0;
+    double rate = 1.0;
     loopelement *parent = NULL;
 
     bool operator ()(sequencerevent *lhs, const sequencerevent *rhs) const
@@ -192,7 +192,7 @@ public:
         end->channel = element->channel;
         end->position = element->stop_tick;
         end->isNoteStartEvent = false;
-        end->rate = 0.0f;
+        end->rate = 1.0f;
         end->parent = element;
         eventsForPattern.insert(end);
 

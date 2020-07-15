@@ -53,7 +53,6 @@ private:
     File _midifile;
     char* _filename;
     unsigned _pulses_per_quater_note;
-    float _current_beats_per_minute = 120.0;
     int _current_track = -1;
     unsigned _currentTrackOffset = 0;
     unsigned _numTracks = 0;

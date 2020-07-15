@@ -6,6 +6,7 @@
 #include "common/songposition.h"
 #include "common/tempo.h"
 #include "common/looptype.h"
+#include "play_sd_raw_resampled.h"
 #include <USBHost_t36.h>
 
 #include <Adafruit_GFX.h>    // Core graphics library
@@ -26,14 +27,14 @@ tempo tempo(132.0f);
 multisequencer multisequencer(tempo);
 
 // GUItool: begin automatically generated code
-AudioPlaySdWav           playSdRaw7;     //xy=184,479
-AudioPlaySdWav           playSdRaw6;     //xy=188,417
-AudioPlaySdWav           playSdRaw8;     //xy=189,534
-AudioPlaySdWav           playSdRaw5;     //xy=193,359
-AudioPlaySdWav           playSdRaw3;     //xy=195,254
-AudioPlaySdWav           playSdRaw4;     //xy=195,306
-AudioPlaySdWav           playSdRaw2;     //xy=199,200
-AudioPlaySdWav           playSdRaw1;     //xy=201,150
+AudioPlaySdRawResampled           playSdRaw7;     //xy=184,479
+AudioPlaySdRawResampled           playSdRaw6;     //xy=188,417
+AudioPlaySdRawResampled           playSdRaw8;     //xy=189,534
+AudioPlaySdRawResampled           playSdRaw5;     //xy=193,359
+AudioPlaySdRawResampled           playSdRaw3;     //xy=195,254
+AudioPlaySdRawResampled           playSdRaw4;     //xy=195,306
+AudioPlaySdRawResampled           playSdRaw2;     //xy=199,200
+AudioPlaySdRawResampled           playSdRaw1;     //xy=201,150
 AudioMixer4              mixer7;         //xy=430,390
 AudioMixer4              mixer3;         //xy=432,316
 AudioInputTDM            tdm1;           //xy=567,375
@@ -127,26 +128,43 @@ const char* pattern4c = "..............x...............................x........
 //                       !       -       !       -        !      -       !       -
 const char* xpattern0 = "..X...X...X...X...X...X...X...X...X...X...X...X...X...X......X.."; 
 const char* xpattern1 = "..........................................................B....."; 
-const char* xpattern2 = "..d.............................................................";
+const char* xpattern2 = "..C.............................................................";
 const char* xpattern3 = "Q...............................................................";
 const char* xpattern4 = "Q...............................................................";
 
+//                       !       -       !       -        !      -       !       -'''+'''!
+const char* xpattern5 = "c.c#d.d#e.f.f#g.g#a.a#b.c.c#d.d#e.f.f#g.g#a.a#bc.c#d.d#e.f.f#g..";
+
+double calcPitchFactor(uint8_t note) {
+    double result = pow(2.0, (note-60) / 12.0);
+    return result;
+}
 
 void readPattern(int channel, int pattern, const char* row, sequencer *sequencer) {
   int index = 0;
 
-  while (row[index] != 0) {
-    int notelength = 0;
-    switch (row[index]) {
-      case 'x' : notelength = 15; break; 
-      case 'X' : notelength = 31; break;
-      case 'B' : notelength = 63; break;
-      case 'C' : notelength = 128; break;             
-      case 'd' : notelength = 255; break;        
-      case 'Q' : notelength = 4095; break;        
-      default:
-        break;
-    }
+    while (row[index] != 0) {
+        char nextNote = index < strlen(row) - 1? row[index + 1] : '\0';
+        int notelength = 0;
+        double pitchFactor = 1.0;
+        switch (row[index]) {
+            case 'x' : notelength = 15; break;
+            case 'X' : notelength = 31; break;
+            case 'B' : notelength = 63; break;
+            case 'C' : notelength = 128; break;
+            case 'Q' : notelength = 4095; break;
+
+            case 'c': pitchFactor = (nextNote == '#')? calcPitchFactor(61) : 1.0; notelength = 31; break;
+            case 'd': pitchFactor = (nextNote == '#')? calcPitchFactor(63) : calcPitchFactor(62); notelength = 31; break;
+            case 'e': pitchFactor = calcPitchFactor(64); notelength = 31; break;
+            case 'f': pitchFactor = (nextNote == '#')? calcPitchFactor(66) : calcPitchFactor(65); notelength = 31; break;
+            case 'g': pitchFactor = (nextNote == '#')? calcPitchFactor(68) : calcPitchFactor(67); notelength = 31; break;
+            case 'a': pitchFactor = (nextNote == '#')? calcPitchFactor(70) : calcPitchFactor(69); notelength = 31; break;
+            case 'b': pitchFactor = calcPitchFactor(71); break;
+
+            default:
+            break;
+        }
 
     if (notelength > 0) {
         loopelement *hihat = new loopelement();
@@ -155,6 +173,7 @@ void readPattern(int channel, int pattern, const char* row, sequencer *sequencer
         hihat->stop_tick = (index * 16) + notelength;
         hihat->channel = channel;
         hihat->loopType = looptypex_none;
+        hihat->rate = pitchFactor;
         sequencer->addelement(pattern, hihat);
     }
     
@@ -167,21 +186,21 @@ String fxnames[18] = {"FX01.wav", "FX02.wav", "FX03.wav", "FX04.wav", "FX05.wav"
 String bassslidenames[11] = {"BASSSL01.wav", "BASSSL02.wav","BASSSL03.wav","BASSSL04.wav", "BASSSL05.wav", "BASSSL06.wav","BASSSL07.wav","BASSSL08.wav","BASSSL09.wav","BASSSL10.wav","BASSSL11.wav"}; 
 
 
-void playSample(AudioPlaySdWav &audio, String s) { 
+void playSample(AudioPlaySdRawResampled &audio, String s, double rate) {
   if (audio.isPlaying())
     audio.stop();
-  
+  audio.setPlaybackRate(rate);
   audio.play(s.c_str());
 }
 
-void stopSample(AudioPlaySdWav &audio) {
+void stopSample(AudioPlaySdRawResampled &audio) {
   if (audio.isPlaying())
     audio.stop();            
 }
 
-void triggerAudioEvent(sequencerevent *event, AudioPlaySdWav &audio, String filename) {
+void triggerAudioEvent(sequencerevent *event, AudioPlaySdRawResampled &audio, String filename) {
   if (event->isNoteStartEvent) {
-    playSample(audio, filename);
+    playSample(audio, filename, event->rate);
   } else 
     stopSample(audio);
 }
@@ -273,17 +292,17 @@ void setup() {
 
   hatsequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
-        case 0: triggerAudioEvent(event, playSdRaw4, "Hihat.WAV"); break;
+        case 0: triggerAudioEvent(event, playSdRaw3, "Hihat.WAV"); break;
         default: break;
       }
   };
 
   basssequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
-        case 0: triggerAudioEvent(event, playSdRaw1, "BASS.WAV"); break;
+        case 0: triggerAudioEvent(event, playSdRaw4, "BASS.WAV"); break;
         case 1: 
           int r = random(10); 
-          triggerAudioEvent(event, playSdRaw6, bassslidenames[r]); break;
+          triggerAudioEvent(event, playSdRaw5, bassslidenames[r]); break;
         default: break;
       }
   };
@@ -373,6 +392,8 @@ void setup() {
   readPattern(0, pattern, pattern2a, basssequencer); // .xxx.xxx.xxx.xxx
   readPattern(1, pattern, xpattern1, basssequencer); 
 
+  pattern = basssequencer->addPattern(4); // pitched frequencies
+  readPattern(0, pattern, xpattern5, basssequencer); // .xxx.xxx.xxx.xxx
 
 
   //fxsequencer
