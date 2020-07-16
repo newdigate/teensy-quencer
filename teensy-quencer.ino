@@ -132,8 +132,8 @@ const char* xpattern2 = "..C....................................................
 const char* xpattern3 = "Q...............................................................";
 const char* xpattern4 = "Q...............................................................";
 
-//                       !       -       !       -        !      -       !       -'''+'''!
-const char* xpattern5 = "c.c#d.d#e.f.f#g.g#a.a#b.c.c#d.d#e.f.f#g.g#a.a#bc.c#d.d#e.f.f#g..";
+//                       !'''+'''-'''+'''!'''+'''-'''+'''!'''+'''-'''+'''!'''+'''-'''+'''!
+const char* xpattern5 = "c.c#d.d#e.f.f#g.g#a.a#b.........c.c#d.d#e.f.f#g.g#a.a#b.........";
 
 double calcPitchFactor(uint8_t note) {
     double result = pow(2.0, (note-60) / 12.0);

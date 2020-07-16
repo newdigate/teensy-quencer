@@ -147,11 +147,14 @@ public:
     }
 
     unsigned int addPattern(unsigned numBars) {
-        vector<loopelement*> *elementsForPattern = new vector<loopelement*>();
+        auto *elementsForPattern = new vector<loopelement*>();
         _elements.push_back(elementsForPattern);
 
-        vector<sequencerevent*> *sortedEventsForPattern = new vector<sequencerevent*>();
+        auto *sortedEventsForPattern = new vector<sequencerevent*>();
         _sorted_events.push_back(sortedEventsForPattern);
+
+        auto *pendingEventsForPattern = new vector<sequencerevent*>();
+        _pending_events.push_back(pendingEventsForPattern);
 
         _loop_duration_bars.push_back(numBars);
 
@@ -163,10 +166,6 @@ public:
     void setNextPattern(unsigned nextPattern) {
         if (nextPattern >= _numPatterns) return;
         _nextPattern = nextPattern;
-    }
-
-    void loadMidi(unsigned pattern, char *midiFileName) {
-        
     }
 
     void addelement(unsigned pattern, loopelement *element) {
@@ -202,6 +201,48 @@ public:
         }
     }
 
+    void addevent(unsigned pattern, sequencerevent *event) {
+        if (pattern >= _numPatterns) return;
+        vector<sequencerevent*> *pendingEventsForPatternPtr = _pending_events[pattern];
+
+        if (event->isNoteStartEvent) {
+            pendingEventsForPatternPtr->push_back( event );
+        } else{
+
+            // first corresponding note-on event
+            sequencerevent *correspondingNoteOnEvent = nullptr;
+            for (const auto & eventToCheck : *pendingEventsForPatternPtr){
+                if (eventToCheck->rate == event->rate) {
+                    correspondingNoteOnEvent = eventToCheck;
+                    auto it = std::find(pendingEventsForPatternPtr->begin(), pendingEventsForPatternPtr->end(), correspondingNoteOnEvent);
+                    if(it != pendingEventsForPatternPtr->end())
+                        pendingEventsForPatternPtr->erase(it);
+                    break;
+                }
+            }
+            if (correspondingNoteOnEvent != nullptr) {
+                auto *loopelement = new struct loopelement();
+                loopelement->start_tick = correspondingNoteOnEvent->position;
+                loopelement->stop_tick = event->position;
+                loopelement->rate = correspondingNoteOnEvent->rate;
+                addelement(pattern, loopelement);
+            }
+        }
+    }
+
+    void closeAllPendingEvents(unsigned pattern) {
+        if (pattern >= _numPatterns) return;
+        vector<sequencerevent*> *pendingEventsForPatternPtr = _pending_events[pattern];
+        unsigned numBarsForPattern = _loop_duration_bars[pattern];
+        for (const auto & pendingevent : *pendingEventsForPatternPtr) {
+            auto *loopelement = new struct loopelement();
+            loopelement->start_tick = pendingevent->position;
+            loopelement->stop_tick = numBarsForPattern * 4 * 256;
+            loopelement->rate = pendingevent->rate;
+            addelement(pattern, loopelement);
+        }
+        pendingEventsForPatternPtr->clear();
+    }
 private:
     tempo &_tempo;
     songposition *_position;
@@ -217,6 +258,8 @@ private:
     vector<unsigned int> _loop_duration_bars;
     vector< vector<loopelement*> * > _elements;
     vector< vector<sequencerevent*> * > _sorted_events;
+
+    vector< vector<sequencerevent*> * > _pending_events;
 
     int _last_event_index = 0;
 };
@@ -238,6 +281,10 @@ public:
         _sequencers.push_back(result);
         _numSequencers++;
         return result;
+    }
+
+    sequencer* getSequencer(unsigned index) {
+        return _sequencers[index];
     }
 
     long indexOf(sequencer *sequencer) {
