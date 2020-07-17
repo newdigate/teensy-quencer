@@ -51,37 +51,38 @@ public:
         if (!_playing) return;
         _microseconds = micros;
 
-        unsigned long deltaMicros = _microseconds - _lastSixtyFourthMicroseconds;
-        if (deltaMicros >= _tempo._microseconds_per_64th) {
-            _lastSixtyFourthMicroseconds = _microseconds;
+        unsigned long deltaMicros = _microseconds - _lastTickMicroseconds;
+        if (deltaMicros >= _tempo._microseconds_per_tick) {
+            _lastTickMicroseconds = _microseconds;
 
-            unsigned long deltaSixtyFourths = deltaMicros / _tempo._microseconds_per_64th;
-            _position->sixtyFourth += deltaSixtyFourths;
-            _position->totalSixtyFourth += deltaSixtyFourths;
-            if (_position->sixtyFourth >= 64) {
-                _position->beat += _position->sixtyFourth / 64;
-                _position->sixtyFourth %= 64;
+            unsigned long deltaTicks = deltaMicros / _tempo._microseconds_per_tick;
+            _position->totalTicks += deltaTicks;
+            _position->ticks += deltaTicks;
+            if (_position->ticks >= 480) {
+                _position->beat += _position->ticks / 480;
+                _position->ticks %= 480;
             }
             if (_position->beat > 4) {
                 _position->bar += _position->beat / 4;
                 _position->beat %= 4;
             }
 
-            unsigned long totalSixtyFourth = _position->totalSixtyFourth;
+            unsigned long totalTicks = _position->totalTicks;
             bool wrapped = false;
             if (_position->bar > _loop_duration_bars[_currentPattern]) {
                 _position->bar %= _loop_duration_bars[_currentPattern];
-                _position->sixtyFourth %= 64 * 4 *  _loop_duration_bars[_currentPattern];
-                _position->totalSixtyFourth %= 64 * 4 * _loop_duration_bars[_currentPattern];
+                _position->ticks %= 480 * 4 *  _loop_duration_bars[_currentPattern];
+                _position->totalTicks %= 480 * 4 * _loop_duration_bars[_currentPattern];
                 wrapped = true;
             }
         
             vector<sequencerevent*> *sortedEventsForPattern = _sorted_events[_currentPattern];
             while (_last_event_index < sortedEventsForPattern->size() ) {
                 sequencerevent* c = (*sortedEventsForPattern)[_last_event_index];
-                if ( c->position > totalSixtyFourth) {
+                if ( c->position > totalTicks) {
                     break;
                 } else {
+                    Serial.printf("note: %d\t\t%d\t\t%.2f\r\n", c->position, c->isNoteStartEvent, c->rate);
                     onevent(c);
                     _last_event_index++;
                 }
@@ -102,7 +103,7 @@ public:
             if (_numPatterns == 0)
                 addPattern(4);
             _previousMicroseconds = micros;
-            _lastSixtyFourthMicroseconds = _previousMicroseconds;
+            _lastTickMicroseconds = _previousMicroseconds;
             _last_event_index = 0;
             _playing = true;
         }
@@ -123,10 +124,10 @@ public:
         {
             sequencerevent *ev = *it;
             if (ev->isNoteStartEvent) {
-                pixel[ev->channel][ev->position/16] = 'X';
-                unsigned length = (ev->parent->stop_tick - ev->parent->start_tick)/16;
+                pixel[ev->channel][ev->position/(120)] = 'X';
+                unsigned length = (ev->parent->stop_tick - ev->parent->start_tick)/120;
                 for (int k=0; k < length; k++) {
-                    int x = (ev->position/16) + k + 1;
+                    int x = (ev->position/120) + k + 1;
                     if (x < 80)
                         pixel[ev->channel][x] = '-';
                 }
@@ -145,6 +146,23 @@ public:
             Serial.println();
         }
     }
+
+    void writenoteslist(unsigned pattern) {
+        if (pattern >= _numPatterns) return;
+
+        Serial.printf("list events in pattern: %d\r\n", pattern);
+        vector<sequencerevent*> *sortedEventsForPatternPtr = _sorted_events[pattern];
+
+        for (auto it = sortedEventsForPatternPtr->begin(); it != sortedEventsForPatternPtr->end(); it++)
+        {
+            sequencerevent *ev = *it;
+            if (ev->isNoteStartEvent) {
+                unsigned length = (ev->parent->stop_tick - ev->parent->start_tick);
+                Serial.printf("note: pos:%d\t\tlen:%d\t\trate:%.2f\t\tch:%d\r\n", ev->position, length, ev->rate, ev->channel);
+            }
+        }
+    }
+
 
     unsigned int addPattern(unsigned numBars) {
         auto *elementsForPattern = new vector<loopelement*>();
@@ -252,7 +270,7 @@ private:
     unsigned _nextPattern = 0;
 
     unsigned long _sixtyFourth = 0;
-    unsigned long _lastSixtyFourthMicroseconds = 0;
+    unsigned long _lastTickMicroseconds = 0;
     unsigned long _microseconds = 0;
     unsigned long _previousMicroseconds = 0;
     vector<unsigned int> _loop_duration_bars;

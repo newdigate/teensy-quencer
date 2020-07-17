@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(testteensyquencer CXX)
 
 include_directories(../teensy_cores_x86)
-include_directories(../common)
+include_directories(../src)
 
 add_executable(testteensyquencer
         runtests.cpp)

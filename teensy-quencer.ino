@@ -2,11 +2,13 @@
 #include <SPI.h>
 #include <SD.h>
 
-#include "common/sequencer.h"
-#include "common/songposition.h"
-#include "common/tempo.h"
-#include "common/looptype.h"
-#include "play_sd_raw_resampled.h"
+#include "src/sequencer.h"
+#include "src/songposition.h"
+#include "src/tempo.h"
+#include "src/looptype.h"
+#include "src/midireader.h"
+#include "src/midisequenceadapter.h"
+#include <play_sd_raw_resampled.h>
 #include <USBHost_t36.h>
 
 #include <Adafruit_GFX.h>    // Core graphics library
@@ -23,8 +25,8 @@ MIDIDevice midi1(myusb);
 MIDIDevice midi2(myusb);
 
 tempo tempo(132.0f);
-
 multisequencer multisequencer(tempo);
+midisequenceadapter adapter(multisequencer);
 
 // GUItool: begin automatically generated code
 AudioPlaySdRawResampled           playSdRaw7;     //xy=184,479
@@ -154,13 +156,13 @@ void readPattern(int channel, int pattern, const char* row, sequencer *sequencer
             case 'C' : notelength = 128; break;
             case 'Q' : notelength = 4095; break;
 
-            case 'c': pitchFactor = (nextNote == '#')? calcPitchFactor(61) : 1.0; notelength = 31; break;
-            case 'd': pitchFactor = (nextNote == '#')? calcPitchFactor(63) : calcPitchFactor(62); notelength = 31; break;
-            case 'e': pitchFactor = calcPitchFactor(64); notelength = 31; break;
-            case 'f': pitchFactor = (nextNote == '#')? calcPitchFactor(66) : calcPitchFactor(65); notelength = 31; break;
-            case 'g': pitchFactor = (nextNote == '#')? calcPitchFactor(68) : calcPitchFactor(67); notelength = 31; break;
-            case 'a': pitchFactor = (nextNote == '#')? calcPitchFactor(70) : calcPitchFactor(69); notelength = 31; break;
-            case 'b': pitchFactor = calcPitchFactor(71); break;
+            case 'c': pitchFactor = (nextNote == '#')? calcPitchFactor(61) : 1.0; notelength = 15; break;
+            case 'd': pitchFactor = (nextNote == '#')? calcPitchFactor(63) : calcPitchFactor(62); notelength = 15; break;
+            case 'e': pitchFactor = calcPitchFactor(64); notelength = 15; break;
+            case 'f': pitchFactor = (nextNote == '#')? calcPitchFactor(66) : calcPitchFactor(65); notelength = 15; break;
+            case 'g': pitchFactor = (nextNote == '#')? calcPitchFactor(68) : calcPitchFactor(67); notelength = 15; break;
+            case 'a': pitchFactor = (nextNote == '#')? calcPitchFactor(70) : calcPitchFactor(69); notelength = 15; break;
+            case 'b': pitchFactor = calcPitchFactor(71); notelength = 15; break;
 
             default:
             break;
@@ -169,8 +171,8 @@ void readPattern(int channel, int pattern, const char* row, sequencer *sequencer
     if (notelength > 0) {
         loopelement *hihat = new loopelement();
         hihat->rate = 1.0f;
-        hihat->start_tick = (index * 16);
-        hihat->stop_tick = (index * 16) + notelength;
+        hihat->start_tick = (index * 480 / 4);
+        hihat->stop_tick = (index * 480 / 4) + (notelength * 8) ;
         hihat->channel = channel;
         hihat->loopType = looptypex_none;
         hihat->rate = pitchFactor;
@@ -388,15 +390,13 @@ void setup() {
   readPattern(0, pattern, xpattern0, basssequencer); // 3 x 4
   readPattern(1, pattern, xpattern1, basssequencer); 
   
-  pattern = basssequencer->addPattern(4); // syncopated, with last as slide
-  readPattern(0, pattern, pattern2a, basssequencer); // .xxx.xxx.xxx.xxx
-  readPattern(1, pattern, xpattern1, basssequencer); 
-
   pattern = basssequencer->addPattern(4); // pitched frequencies
   readPattern(0, pattern, xpattern5, basssequencer); // .xxx.xxx.xxx.xxx
 
+  adapter.loadMidi("mono2.mid");
+  adapter.loadMidifileToNextChannelPattern(2, 0, 4);
 
-  //fxsequencer
+    //fxsequencer
   pattern = fxsequencer->addPattern(4); // no fx
 
   pattern = fxsequencer->addPattern(4); // inbetween fx
@@ -485,6 +485,7 @@ void loop() {
           Serial.printf("setting next patteren to %d\n", inString.toInt());
           currentSequencer->setNextPattern(inString.toInt());
           currentSequencer->writescore(inString.toInt());
+          currentSequencer->writenoteslist(inString.toInt());
         }
         inString = "";
         inputChannel = "";    

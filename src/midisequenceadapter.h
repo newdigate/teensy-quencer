@@ -5,6 +5,11 @@
 #ifndef TEENSYSEQUENCER_MIDISEQUENCEADAPTER_H
 #define TEENSYSEQUENCER_MIDISEQUENCEADAPTER_H
 
+#if ARDUINO >= 100
+#include "Arduino.h"
+#else
+#endif
+
 #include "midireader.h"
 #include "sequencer.h"
 #include <cmath>
@@ -27,13 +32,17 @@ public:
         midimessage message = {};
         long totalTicks = 0;
         while (_midifileReader.read(message)
-               && totalTicks < numBars * 256 * 4 ){
+               && totalTicks < numBars * 480 * 4){
             totalTicks += message.delta_ticks;
+
             sequencerevent *event = new sequencerevent();
             event->channel = message.channel;
             event->position = totalTicks;
             event->isNoteStartEvent = message.status == 0x90 && message.velocity > 0;
             event->rate = calcPitchFactor(message.key);
+
+            Serial.printf("total ticks: %d - (ch:%d, pos:%d, noteOn:%x, rate:%.2f)\r\n", totalTicks, event->channel, event->position, event->isNoteStartEvent, event->rate);
+
             sequencer->addevent(patternNumber, event );
         }
         sequencer->closeAllPendingEvents(patternNumber);

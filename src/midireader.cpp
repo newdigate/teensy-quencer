@@ -53,6 +53,11 @@ bool midireader::open(const char *filename) {
     _midifile.read(buffer, 2);
     header.division = static_cast<uint16_t>(buffer[0] << 8 | buffer[1]);
 
+    if ((buffer[0] & 0x80) == 0x80) {
+        _ticks_per_quarter_note = header.division;
+        Serial.printf("ticks per quarter note: %d\r\n", _ticks_per_quarter_note);
+    }
+
     for (uint16_t i = 0; i < header.num_tracks; i++) {
         _midifile.read(buffer, 4);
 
@@ -68,7 +73,7 @@ bool midireader::open(const char *filename) {
         _numTracks++;
     }
 
-    _pulses_per_quater_note = header.division;
+    _ticks_per_quarter_note = header.division;
     if (_track_offset.size() > 0) {
         _current_track = 0;
         _midifile.seek(_track_offset[0]);
@@ -214,8 +219,8 @@ bool midireader::read(midimessage &midiMessage) {
                                     uint8_t dd = _midifile.read(); // denomiator = 2^dd
                                     uint8_t cc = _midifile.read(); //
                                     uint64_t microseconds_per_quarter_note = nn << 16 | dd << 8 | cc;
-                                    float millieconds_per_quarter_note = microseconds_per_quarter_note / 1000;
-                                    float bpm = 60000 / millieconds_per_quarter_note;
+                                    double bpm = 60000000 / microseconds_per_quarter_note;
+                                    _currentBPM = bpm;
                                     Serial.printf("tempo : %f\n", bpm);
                                     _currentTrackOffset += 3;
                                 }
@@ -357,4 +362,5 @@ bool midireader::setTrackNumber(unsigned char trackNumber) {
         _midifile.seek(_track_offset[trackNumber]);
         _currentTrackOffset = 0;
     } else return false;
+    return false;
 }
