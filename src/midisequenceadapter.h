@@ -24,7 +24,7 @@ public:
         return _midifileReader.open(filename);
     }
 
-    void loadMidifileToNextChannelPattern(unsigned toSequencerChannel, unsigned midiFileTrackNumber, unsigned numBars){
+    void loadMidifileToNextChannelPattern(unsigned toSequencerChannel, unsigned midiFileTrackNumber, unsigned numBars, int transpose=0){
         sequencer* sequencer = _multisequencer.getSequencer(toSequencerChannel);
         unsigned patternNumber = sequencer->addPattern(numBars);
 
@@ -36,10 +36,11 @@ public:
             totalTicks += message.delta_ticks;
 
             sequencerevent *event = new sequencerevent();
-            event->channel = message.channel;
+            //event->channel = message.channel;
+            event->channel = 0;
             event->position = totalTicks;
-            event->isNoteStartEvent = message.status == 0x90 && message.velocity > 0;
-            event->rate = calcPitchFactor(message.key);
+            event->isNoteStartEvent = (message.status & 0xF0) == 0x90 && message.velocity > 0;
+            event->rate = calcPitchFactor(message.key, transpose);
 
             Serial.printf("total ticks: %d - (ch:%d, pos:%d, noteOn:%x, rate:%.2f)\r\n", totalTicks, event->channel, event->position, event->isNoteStartEvent, event->rate);
 
@@ -48,8 +49,8 @@ public:
         sequencer->closeAllPendingEvents(patternNumber);
     }
 
-    static double calcPitchFactor(uint8_t note) {
-        double result = pow(2.0, (note-60) / 12.0);
+    static double calcPitchFactor(uint8_t note, int transpose) {
+        double result = pow(2.0, (note-60+transpose) / 12.0);
         return result;
     }
 

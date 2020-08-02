@@ -1,14 +1,13 @@
 #include <Audio.h>
 #include <SPI.h>
 #include <SD.h>
-
+#include <teensy_sampler.h>
 #include "src/sequencer.h"
 #include "src/songposition.h"
 #include "src/tempo.h"
 #include "src/looptype.h"
 #include "src/midireader.h"
 #include "src/midisequenceadapter.h"
-#include <play_sd_raw_resampled.h>
 #include <USBHost_t36.h>
 
 #include <Adafruit_GFX.h>    // Core graphics library
@@ -29,14 +28,14 @@ multisequencer multisequencer(tempo);
 midisequenceadapter adapter(multisequencer);
 
 // GUItool: begin automatically generated code
-AudioPlaySdRawResampled           playSdRaw7;     //xy=184,479
-AudioPlaySdRawResampled           playSdRaw6;     //xy=188,417
-AudioPlaySdRawResampled           playSdRaw8;     //xy=189,534
-AudioPlaySdRawResampled           playSdRaw5;     //xy=193,359
-AudioPlaySdRawResampled           playSdRaw3;     //xy=195,254
-AudioPlaySdRawResampled           playSdRaw4;     //xy=195,306
-AudioPlaySdRawResampled           playSdRaw2;     //xy=199,200
-AudioPlaySdRawResampled           playSdRaw1;     //xy=201,150
+AudioPlaySdWavResmp           playSdRaw7;     //xy=184,479
+AudioPlaySdWavResmp           playSdRaw6;     //xy=188,417
+AudioPlaySdWavResmp           playSdRaw8;     //xy=189,534
+AudioPlaySdWavResmp           playSdRaw5;     //xy=193,359
+AudioPlaySdWavResmp           playSdRaw3;     //xy=195,254
+AudioPlaySdWavResmp           playSdRaw4;     //xy=195,306
+AudioPlaySdWavResmp           playSdRaw2;     //xy=199,200
+AudioPlaySdWavResmp           playSdRaw1;     //xy=201,150
 AudioMixer4              mixer7;         //xy=430,390
 AudioMixer4              mixer3;         //xy=432,316
 AudioInputTDM            tdm1;           //xy=567,375
@@ -119,8 +118,8 @@ const char* pattern2b = ".x.X.x.X.x.X.x.X.x.X.x.X.x.X.x.X.x.X.x.X.x.X.x.X.x.X.x.
 const char* pattern3b = "....x.......x.......x.......x.......x.......x.......x.......x.x."; 
 const char* pattern4b = "..............x...............................x................."; 
 
-//                       !   .   -   .   !   .   -   .    !  .   -   .   !   .   -   .   
-const char* pattern1c = "x.........x.....x.........x......x........x.....x.........x....."; 
+//                       !   .   -   .   !sss.sss-sss.sss!sss.sss-sss.sss!sss.sss-sss.sss
+const char* pattern1c = "x.........x.....x.........x.....x.........x.....x.........x....."; 
 const char* pattern2c = "..X...X.......X...X...X.......X...X...X.......X...X...X..x.x...."; 
 const char* pattern3c = "....x.......x.......x.......x.......x.......x.......x.......x..."; 
 const char* pattern4c = "..............x...............................x................."; 
@@ -188,19 +187,19 @@ String fxnames[18] = {"FX01.wav", "FX02.wav", "FX03.wav", "FX04.wav", "FX05.wav"
 String bassslidenames[11] = {"BASSSL01.wav", "BASSSL02.wav","BASSSL03.wav","BASSSL04.wav", "BASSSL05.wav", "BASSSL06.wav","BASSSL07.wav","BASSSL08.wav","BASSSL09.wav","BASSSL10.wav","BASSSL11.wav"}; 
 
 
-void playSample(AudioPlaySdRawResampled &audio, String s, double rate) {
+void playSample(AudioPlaySdWavResmp &audio, String s, double rate) {
   if (audio.isPlaying())
     audio.stop();
   audio.setPlaybackRate(rate);
   audio.play(s.c_str());
 }
 
-void stopSample(AudioPlaySdRawResampled &audio) {
+void stopSample(AudioPlaySdWavResmp &audio) {
   if (audio.isPlaying())
     audio.stop();            
 }
 
-void triggerAudioEvent(sequencerevent *event, AudioPlaySdRawResampled &audio, String filename) {
+void triggerAudioEvent(sequencerevent *event, AudioPlaySdWavResmp &audio, String filename) {
   if (event->isNoteStartEvent) {
     playSample(audio, filename, event->rate);
   } else 
@@ -209,6 +208,7 @@ void triggerAudioEvent(sequencerevent *event, AudioPlaySdRawResampled &audio, St
 
 
 sequencer *beatsequencer;
+sequencer *snaresequencer;
 sequencer *hatsequencer;
 sequencer *basssequencer;
 sequencer *fxsequencer;
@@ -217,7 +217,7 @@ sequencer *longfxsequencer;
 
 void setup() {
   AudioNoInterrupts();  // disable audio library momentarily
-  AudioMemory(80);
+  AudioMemory(60);
 
   SPI.begin();
   tft.initR(INITR_GREENTAB);
@@ -278,6 +278,7 @@ void setup() {
   };
 
   beatsequencer = multisequencer.newSequencer();
+  snaresequencer = multisequencer.newSequencer();
   hatsequencer = multisequencer.newSequencer();
   basssequencer = multisequencer.newSequencer();
   fxsequencer = multisequencer.newSequencer();
@@ -286,8 +287,14 @@ void setup() {
   
   beatsequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
-        case 0: triggerAudioEvent(event, playSdRaw1, "KICK.WAV"); break;
-        case 1: triggerAudioEvent(event, playSdRaw2, "SNARE.WAV"); break;      
+        case 0: triggerAudioEvent(event, playSdRaw1, "KICK.WAV"); break;      
+        default: break;
+      }
+  };
+
+  snaresequencer->onevent = [] (sequencerevent *event) {
+      switch(event->channel) {
+        case 0: triggerAudioEvent(event, playSdRaw2, "SNARE.WAV"); break;      
         default: break;
       }
   };
@@ -337,6 +344,7 @@ void setup() {
   };
 
   int pattern = 0;
+  int currentChannel = 0;
   
   // beatsequencer
   pattern = beatsequencer->addPattern(4); // no beat
@@ -344,25 +352,31 @@ void setup() {
   pattern = beatsequencer->addPattern(4); // kick solo 4 x 4
   readPattern(0, pattern, pattern4x4, beatsequencer); //kick
 
-  pattern = beatsequencer->addPattern(4); // kick solo 4 x 4 + snare
-  readPattern(0, pattern, pattern4x4, beatsequencer); //kick
-  readPattern(1, pattern, patternSnr, beatsequencer); //snare
-
   pattern = beatsequencer->addPattern(4); // breakbeat
   readPattern(0, pattern, pattern1c, beatsequencer); //kick
-  readPattern(1, pattern, patternSnr, beatsequencer); //snare
   pattern++;
 
   pattern = beatsequencer->addPattern(4); // half-time
   readPattern(0, pattern, pathalf4x4, beatsequencer); //kick
-  readPattern(1, pattern, pathalfSyn, beatsequencer); //snare
   pattern++;
 
-  pattern = beatsequencer->addPattern(4); // snare solo
-  readPattern(1, pattern, patternSnr, beatsequencer); //snare
 
+  // snaresequencer
+  currentChannel++;
+  pattern = beatsequencer->addPattern(4); // no beat 4 bars
+  
+  adapter.loadMidi("snare.mid");
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8);  // multicequencer channel number, midi track number, 8 bars long
+  pattern++;
+  
   // hatsequencer
+  currentChannel++;
   pattern = hatsequencer->addPattern(4); // no hats
+
+  adapter.loadMidi("hihat.mid");
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8);  // multicequencer channel number, midi track number, 8 bars long
+  basssequencer->setNextPattern(pattern);
+  pattern++;
 
   pattern = hatsequencer->addPattern(4);
   readPattern(0, pattern, patternSyn, hatsequencer); // syncopated
@@ -381,6 +395,7 @@ void setup() {
 
  
   // basssequencer
+  currentChannel++;
   pattern = basssequencer->addPattern(4); // no bass
 
   pattern = basssequencer->addPattern(4); // syncopated
@@ -393,26 +408,29 @@ void setup() {
   pattern = basssequencer->addPattern(4); // pitched frequencies
   readPattern(0, pattern, xpattern5, basssequencer); // .xxx.xxx.xxx.xxx
 
-  adapter.loadMidi("mono2.mid");
-  adapter.loadMidifileToNextChannelPattern(2, 0, 4);
+  adapter.loadMidi("dredbass.mid");
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8, 24);
+  pattern++;
+  basssequencer->setNextPattern(pattern);
 
-    //fxsequencer
+
+  //fxsequencer
+  currentChannel++;
   pattern = fxsequencer->addPattern(4); // no fx
 
   pattern = fxsequencer->addPattern(4); // inbetween fx
   readPattern(0, pattern, xpattern2, fxsequencer); // fx
      
   //crashsequencer
+  currentChannel++;
   pattern = crashsequencer->addPattern(8); // no crash
 
   pattern = crashsequencer->addPattern(8); // crash on first beat of 8 bars
   readPattern(0, pattern, xpattern3, crashsequencer); // fx
-     
 
-
-
-     
+          
   //longfxsequencer
+  currentChannel++;
   pattern = longfxsequencer->addPattern(8); // no long fx
 
   pattern = longfxsequencer->addPattern(8); // longfx on first beat of 16 bars
@@ -476,8 +494,10 @@ void loop() {
           case 1: currentSequencer = hatsequencer; break;
           case 2: currentSequencer = basssequencer; break;
           case 3: currentSequencer = fxsequencer; break;
+          case 4: currentSequencer = crashsequencer; break;
+          case 5: currentSequencer = longfxsequencer; break;
           default:
-            Serial.printf("invalid channel input (should be 0,1,2,3): %s\n", inputChannel);
+            Serial.printf("invalid channel input (should be 0..5): %s\n", inputChannel);
             break;
         } 
               

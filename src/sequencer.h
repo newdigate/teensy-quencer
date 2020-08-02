@@ -82,7 +82,7 @@ public:
                 if ( c->position > totalTicks) {
                     break;
                 } else {
-                    Serial.printf("note: %d\t\t%d\t\t%.2f\r\n", c->position, c->isNoteStartEvent, c->rate);
+                    //Serial.printf("note: %d\t\t%d\t\t%.2f\r\n", c->position, c->isNoteStartEvent, c->rate);
                     onevent(c);
                     _last_event_index++;
                 }
