@@ -1,4 +1,6 @@
 # teensyquencer
+![Version 1.9](https://img.shields.io/badge/warning-work_in_progress-brightgreen.svg?label=warning&colorA=555555&colorB=ff4a88)
+
 A multi-channel loop pattern sequencer for teensy
 * each channel loops independently and own lenth
 * setting next pattern on a channel will take effect once current pattern on that channel is complete.
