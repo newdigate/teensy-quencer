@@ -23,6 +23,9 @@ public:
     bool loadMidi(const char* filename){
         return _midifileReader.open(filename);
     }
+    void close() {
+        _midifileReader.close();
+    }
 
     void loadMidifileToNextChannelPattern(unsigned toSequencerChannel, unsigned midiFileTrackNumber, unsigned numBars, int transpose=0){
         sequencer* sequencer = _multisequencer.getSequencer(toSequencerChannel);
@@ -42,7 +45,7 @@ public:
             event->isNoteStartEvent = (message.status & 0xF0) == 0x90 && message.velocity > 0;
             event->rate = calcPitchFactor(message.key, transpose);
 
-            Serial.printf("total ticks: %d - (ch:%d, pos:%d, noteOn:%x, rate:%.2f)\r\n", totalTicks, event->channel, event->position, event->isNoteStartEvent, event->rate);
+            //Serial.printf("total ticks: %d - (ch:%d, pos:%d, noteOn:%x, rate:%.2f)\r\n", totalTicks, event->channel, event->position, event->isNoteStartEvent, event->rate);
 
             sequencer->addevent(patternNumber, event );
         }

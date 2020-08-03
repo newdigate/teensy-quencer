@@ -18,6 +18,12 @@ bool midireader::open(const char *filename) {
     if (!SD.exists(filename))
         return false;
 
+    _current_track = -1;
+    _currentTrackOffset = 0;
+    _numTracks = 0;
+    _track_size.clear();
+    _track_offset.clear();
+
     _midifile = SD.open(filename);
 
     if (!_midifile)
@@ -84,6 +90,11 @@ bool midireader::open(const char *filename) {
     }
 
     return true;
+}
+
+void midireader::close() {
+    if (_midifile)
+      _midifile.close();
 }
 
 void midireader::readMetaText() {

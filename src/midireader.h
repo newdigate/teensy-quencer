@@ -41,6 +41,7 @@ public:
     };
 
     bool open(const char* filename);
+    void close();
     bool setTrackNumber(unsigned char trackNumber);
     bool read(midimessage &midiMessage);
 

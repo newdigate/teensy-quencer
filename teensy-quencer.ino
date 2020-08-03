@@ -26,69 +26,81 @@ MIDIDevice midi2(myusb);
 tempo tempo(132.0f);
 multisequencer multisequencer(tempo);
 midisequenceadapter adapter(multisequencer);
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <SerialFlash.h>
 
 // GUItool: begin automatically generated code
-AudioPlaySdWavResmp           playSdRaw7;     //xy=184,479
-AudioPlaySdWavResmp           playSdRaw6;     //xy=188,417
-AudioPlaySdWavResmp           playSdRaw8;     //xy=189,534
-AudioPlaySdWavResmp           playSdRaw5;     //xy=193,359
-AudioPlaySdWavResmp           playSdRaw3;     //xy=195,254
-AudioPlaySdWavResmp           playSdRaw4;     //xy=195,306
-AudioPlaySdWavResmp           playSdRaw2;     //xy=199,200
-AudioPlaySdWavResmp           playSdRaw1;     //xy=201,150
-AudioMixer4              mixer7;         //xy=430,390
-AudioMixer4              mixer3;         //xy=432,316
-AudioInputTDM            tdm1;           //xy=567,375
-AudioMixer4              mixer1;         //xy=568,218
-AudioMixer4              mixer2;         //xy=571,535
-AudioMixer4              mixer4;         //xy=780,101
-AudioMixer4              mixer10;        //xy=779,552
-AudioMixer4              mixer6;         //xy=782,162
-AudioMixer4              mixer9;         //xy=782,223
-AudioMixer4              mixer8;         //xy=781,487
-AudioMixer4              mixer11;        //xy=782,284
-AudioMixer4              mixer5;         //xy=783,423
-AudioMixer4              mixer12;        //xy=786,616
-AudioOutputTDM           tdm3;           //xy=985,399
+AudioSynthWaveformSine   sine1;          //xy=184,652
+
+AudioPlaySdWav           playSdRaw8;     //xy=188,547
+
+AudioPlaySdWavResmp           playSdRaw7;     //xy=183,492
+AudioPlaySdWavResmp           playSdRaw6;     //xy=187,430
+AudioPlaySdWavResmp           playSdRaw5;     //xy=192,372
+AudioPlaySdWavResmp           playSdRaw3;     //xy=194,267
+AudioPlaySdWavResmp           playSdRaw4;     //xy=194,319
+AudioPlaySdWavResmp           playSdRaw2;     //xy=198,213
+AudioPlaySdWavResmp           playSdRaw1;     //xy=200,163
+AudioEffectEnvelope      envelope1;      //xy=326,651
+AudioMixer4              mixer7;         //xy=429,403
+AudioMixer4              mixer3;         //xy=431,329
+AudioInputTDM            tdm1;           //xy=566,388
+AudioMixer4              mixer1;         //xy=567,231
+AudioMixer4              mixer2;         //xy=570,548
+AudioMixer4              mixer4;         //xy=779,114
+AudioMixer4              mixer10;        //xy=778,565
+AudioMixer4              mixer6;         //xy=781,175
+AudioMixer4              mixer9;         //xy=781,236
+AudioMixer4              mixer8;         //xy=780,500
+AudioMixer4              mixer11;        //xy=781,297
+AudioMixer4              mixer5;         //xy=782,436
+AudioMixer4              mixer12;        //xy=785,629
+AudioOutputTDM           tdm3;           //xy=984,412
 AudioConnection          patchCord1(playSdRaw7, 0, mixer7, 3);
 AudioConnection          patchCord2(playSdRaw7, 1, mixer7, 0);
-AudioConnection          patchCord3(playSdRaw6, 0, mixer7, 2);
-AudioConnection          patchCord4(playSdRaw8, 0, mixer1, 1);
-AudioConnection          patchCord5(playSdRaw8, 1, mixer2, 2);
-AudioConnection          patchCord6(playSdRaw5, 0, mixer7, 1);
-AudioConnection          patchCord7(playSdRaw3, 0, mixer3, 2);
-AudioConnection          patchCord8(playSdRaw4, 0, mixer3, 3);
-AudioConnection          patchCord9(playSdRaw2, 0, mixer3, 1);
-AudioConnection          patchCord10(playSdRaw1, 0, mixer3, 0);
-AudioConnection          patchCord11(mixer7, 0, mixer1, 2);
-AudioConnection          patchCord12(mixer7, 0, mixer2, 1);
-AudioConnection          patchCord13(mixer3, 0, mixer1, 0);
-AudioConnection          patchCord14(mixer3, 0, mixer2, 0);
-AudioConnection          patchCord15(tdm1, 0, mixer4, 1);
-AudioConnection          patchCord16(tdm1, 2, mixer5, 0);
-AudioConnection          patchCord17(tdm1, 4, mixer6, 0);
-AudioConnection          patchCord18(tdm1, 6, mixer8, 0);
-AudioConnection          patchCord19(tdm1, 8, mixer9, 0);
-AudioConnection          patchCord20(tdm1, 10, mixer10, 0);
-AudioConnection          patchCord21(tdm1, 12, mixer11, 0);
-AudioConnection          patchCord22(tdm1, 14, mixer12, 0);
-AudioConnection          patchCord23(mixer1, 0, mixer4, 0);
-AudioConnection          patchCord24(mixer1, 0, mixer6, 1);
-AudioConnection          patchCord25(mixer1, 0, mixer9, 1);
-AudioConnection          patchCord26(mixer1, 0, mixer11, 1);
-AudioConnection          patchCord27(mixer2, 0, mixer5, 1);
-AudioConnection          patchCord28(mixer2, 0, mixer8, 1);
-AudioConnection          patchCord29(mixer2, 0, mixer10, 1);
-AudioConnection          patchCord30(mixer2, 0, mixer12, 1);
-AudioConnection          patchCord31(mixer4, 0, tdm3, 0);
-AudioConnection          patchCord32(mixer10, 0, tdm3, 10);
-AudioConnection          patchCord33(mixer6, 0, tdm3, 4);
-AudioConnection          patchCord34(mixer9, 0, tdm3, 8);
-AudioConnection          patchCord35(mixer8, 0, tdm3, 6);
-AudioConnection          patchCord36(mixer11, 0, tdm3, 12);
-AudioConnection          patchCord37(mixer5, 0, tdm3, 2);
-AudioConnection          patchCord38(mixer12, 0, tdm3, 14);
-AudioControlCS42448      cs42448_1;      //xy=569,637
+AudioConnection          patchCord3(sine1, envelope1);
+AudioConnection          patchCord4(playSdRaw6, 0, mixer7, 2);
+AudioConnection          patchCord5(playSdRaw8, 0, mixer1, 1);
+AudioConnection          patchCord6(playSdRaw8, 1, mixer2, 2);
+AudioConnection          patchCord7(playSdRaw5, 0, mixer7, 1);
+AudioConnection          patchCord8(playSdRaw3, 0, mixer3, 2);
+AudioConnection          patchCord9(playSdRaw4, 0, mixer3, 3);
+AudioConnection          patchCord10(playSdRaw2, 0, mixer3, 1);
+AudioConnection          patchCord11(playSdRaw1, 0, mixer3, 0);
+AudioConnection          patchCord12(envelope1, 0, mixer2, 3);
+AudioConnection          patchCord13(envelope1, 0, mixer1, 3);
+AudioConnection          patchCord14(mixer7, 0, mixer1, 2);
+AudioConnection          patchCord15(mixer7, 0, mixer2, 1);
+AudioConnection          patchCord16(mixer3, 0, mixer1, 0);
+AudioConnection          patchCord17(mixer3, 0, mixer2, 0);
+AudioConnection          patchCord18(tdm1, 0, mixer4, 1);
+AudioConnection          patchCord19(tdm1, 2, mixer5, 0);
+AudioConnection          patchCord20(tdm1, 4, mixer6, 0);
+AudioConnection          patchCord21(tdm1, 6, mixer8, 0);
+AudioConnection          patchCord22(tdm1, 8, mixer9, 0);
+AudioConnection          patchCord23(tdm1, 10, mixer10, 0);
+AudioConnection          patchCord24(tdm1, 12, mixer11, 0);
+AudioConnection          patchCord25(tdm1, 14, mixer12, 0);
+AudioConnection          patchCord26(mixer1, 0, mixer4, 0);
+AudioConnection          patchCord27(mixer1, 0, mixer6, 1);
+AudioConnection          patchCord28(mixer1, 0, mixer9, 1);
+AudioConnection          patchCord29(mixer1, 0, mixer11, 1);
+AudioConnection          patchCord30(mixer2, 0, mixer5, 1);
+AudioConnection          patchCord31(mixer2, 0, mixer8, 1);
+AudioConnection          patchCord32(mixer2, 0, mixer10, 1);
+AudioConnection          patchCord33(mixer2, 0, mixer12, 1);
+AudioConnection          patchCord34(mixer4, 0, tdm3, 0);
+AudioConnection          patchCord35(mixer10, 0, tdm3, 10);
+AudioConnection          patchCord36(mixer6, 0, tdm3, 4);
+AudioConnection          patchCord37(mixer9, 0, tdm3, 8);
+AudioConnection          patchCord38(mixer8, 0, tdm3, 6);
+AudioConnection          patchCord39(mixer11, 0, tdm3, 12);
+AudioConnection          patchCord40(mixer5, 0, tdm3, 2);
+AudioConnection          patchCord41(mixer12, 0, tdm3, 14);
+AudioControlCS42448      cs42448_1;      //xy=568,650
 // GUItool: end automatically generated code
 
 
@@ -206,6 +218,24 @@ void triggerAudioEvent(sequencerevent *event, AudioPlaySdWavResmp &audio, String
     stopSample(audio);
 }
 
+void playSample(AudioPlaySdWav &audio, String s, double rate) {
+  if (audio.isPlaying())
+    audio.stop();
+  audio.play(s.c_str());
+}
+
+void stopSample(AudioPlaySdWav &audio) {
+  if (audio.isPlaying())
+    audio.stop();            
+}
+
+void triggerAudioEvent(sequencerevent *event, AudioPlaySdWav &audio, String filename) {
+  if (event->isNoteStartEvent) {
+    playSample(audio, filename, event->rate);
+  } else 
+    stopSample(audio);
+}
+
 
 sequencer *beatsequencer;
 sequencer *snaresequencer;
@@ -308,7 +338,16 @@ void setup() {
 
   basssequencer->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
-        case 0: triggerAudioEvent(event, playSdRaw4, "BASS.WAV"); break;
+        case 0: 
+
+          if (event->isNoteStartEvent) {
+            sine1.frequency( event->rate * 65.41);
+            envelope1.noteOn();
+          } else {
+            envelope1.noteOff();
+          }
+          triggerAudioEvent(event, playSdRaw4, "BASS.WAV"); 
+          break;
         case 1: 
           int r = random(10); 
           triggerAudioEvent(event, playSdRaw5, bassslidenames[r]); break;
@@ -363,20 +402,22 @@ void setup() {
 
   // snaresequencer
   currentChannel++;
-  pattern = beatsequencer->addPattern(4); // no beat 4 bars
+  pattern = snaresequencer->addPattern(4); // no beat 4 bars
   
+  pattern++;
   adapter.loadMidi("snare.mid");
   adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8);  // multicequencer channel number, midi track number, 8 bars long
-  pattern++;
+  adapter.close();
   
   // hatsequencer
   currentChannel++;
   pattern = hatsequencer->addPattern(4); // no hats
 
+  pattern++;
   adapter.loadMidi("hihat.mid");
   adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8);  // multicequencer channel number, midi track number, 8 bars long
-  basssequencer->setNextPattern(pattern);
-  pattern++;
+  adapter.close();
+  hatsequencer->setNextPattern(pattern);
 
   pattern = hatsequencer->addPattern(4);
   readPattern(0, pattern, patternSyn, hatsequencer); // syncopated
@@ -408,9 +449,10 @@ void setup() {
   pattern = basssequencer->addPattern(4); // pitched frequencies
   readPattern(0, pattern, xpattern5, basssequencer); // .xxx.xxx.xxx.xxx
 
-  adapter.loadMidi("dredbass.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8, 24);
   pattern++;
+  adapter.loadMidi("dredbass.mid");
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 24);
+  adapter.close();
   basssequencer->setNextPattern(pattern);
 
 
@@ -433,9 +475,11 @@ void setup() {
   currentChannel++;
   pattern = longfxsequencer->addPattern(8); // no long fx
 
-  pattern = longfxsequencer->addPattern(8); // longfx on first beat of 16 bars
+  pattern = longfxsequencer->addPattern(32); // longfx on first beat of 32 bars
   readPattern(0, pattern, xpattern4, longfxsequencer); // fx
      
+  sine1.frequency(440);
+  sine1.amplitude(0.3);
   
   multisequencer.start(micros());
   printusage();
@@ -491,13 +535,14 @@ void loop() {
         sequencer *currentSequencer = NULL;
         switch (inputChannel.toInt()) {
           case 0: currentSequencer = beatsequencer; break;
-          case 1: currentSequencer = hatsequencer; break;
-          case 2: currentSequencer = basssequencer; break;
-          case 3: currentSequencer = fxsequencer; break;
-          case 4: currentSequencer = crashsequencer; break;
-          case 5: currentSequencer = longfxsequencer; break;
+          case 1: currentSequencer = snaresequencer; break;
+          case 2: currentSequencer = hatsequencer; break;
+          case 3: currentSequencer = basssequencer; break;
+          case 4: currentSequencer = fxsequencer; break;
+          case 5: currentSequencer = crashsequencer; break;
+          case 6: currentSequencer = longfxsequencer; break;
           default:
-            Serial.printf("invalid channel input (should be 0..5): %s\n", inputChannel);
+            Serial.printf("invalid channel input (should be 0..6): %s\n", inputChannel);
             break;
         } 
               
@@ -532,11 +577,12 @@ void myNoteOn(byte channel, byte note, byte velocity) {
   sequencer *sequencer = NULL;
   switch (channel) {
     case 1: sequencer = beatsequencer; break;
-    case 2: sequencer = hatsequencer; break;
-    case 3: sequencer = basssequencer; break;
-    case 4: sequencer = fxsequencer; break;
-    case 5: sequencer = crashsequencer; break;
-    case 6: sequencer = longfxsequencer; break;
+    case 2: sequencer = snaresequencer; break;
+    case 3: sequencer = hatsequencer; break;
+    case 4: sequencer = basssequencer; break;
+    case 5: sequencer = fxsequencer; break;
+    case 6: sequencer = crashsequencer; break;
+    case 7: sequencer = longfxsequencer; break;
     default: break;
   }
 
