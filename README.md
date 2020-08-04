@@ -63,21 +63,28 @@ midisequenceadapter adapter(multisequencer); // to read midi files into the a se
   const char* pattern4x4 = "X...X...X...X...X...X...X...X...X...X...X...X...X...X...X...X..."; 
   const char* patternSnr = "....x.......x.......x.......x.......x.......x.......x.......x..."; 
 
-  int pattern = sequencer->addPattern(4); // empty pattern: 4 bars;
-  pattern = sequencer->addPattern(4); // kick solo 4 x 4: 4 bars
+  // sequencer1
+  int pattern = sequencer1->addPattern(4); // empty pattern: 4 bars;
+  
+  pattern = sequencer1->addPattern(4); // kick solo 4 x 4: 4 bars
   readPattern(0, pattern, pattern4x4, sequencer); //kick
 
-  pattern = sequencer->addPattern(4); // kick solo 4 x 4 + snare: 4 bars;
+  pattern = sequencer1->addPattern(4); // kick solo 4 x 4 + snare: 4 bars;
   readPattern(0, pattern, pattern4x4, sequencer); //kick
   readPattern(1, pattern, patternSnr, sequencer); //snare
   
-  // load 'snare.mid' smf into next pattern
+  // load 'snare.mid' smf into next pattern of sequencer1
   adapter.loadMidi("snare.mid");
-  adapter.loadMidifileToNextChannelPattern(0, 0, 8);  // multisequencer channel number=0, midi track number, 8 bars long
+  adapter.loadMidifileToNextChannelPattern(0, 0, 8);  // multisequencer channel number=0 (==sequencer1), midi track number=0, 8 bars long
   adapter.close();
-  
+
+
+  // sequencer2
+  pattern = sequencer2->addPattern(4); // empty pattern: 4 bars;
+
+  // load 'dredbass.mid' smf into next pattern of sequencer2
   adapter.loadMidi("dredbass.mid");
-  adapter.loadMidifileToNextChannelPattern(0, 0, 128, 24); // multisequencer channel number=0, midi track number, 128 bars long, transpose 24 notes
+  adapter.loadMidifileToNextChannelPattern(1, 0, 128, 24); // multisequencer channel number=1 (==sequencer2), midi track number=0, 128 bars long, transpose 24 notes
   adapter.close();
 
 ```
