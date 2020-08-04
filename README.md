@@ -26,20 +26,35 @@ multisequencer multisequencer(tempo);
 midisequenceadapter adapter(multisequencer); // to read midi files into the a sequencer pattern
 ```
 
-* add sequencer channel:
+* add sequencer channel(s):
 ``` c
-  sequencer *sequencer = multisequencer.newSequencer();
+  sequencer *sequencer1 = multisequencer.newSequencer();
+  sequencer *sequencer2 = multisequencer.newSequencer();
 ```
 
 * add event callbacks:
 ``` c
-  sequencer->onevent = [] (sequencerevent *event) {
+  sequencer1->onevent = [] (sequencerevent *event) {
       switch(event->channel) {
         case 0: triggerAudioEvent(event, playSdRaw1, "KICK.WAV"); break;
         case 1: triggerAudioEvent(event, playSdRaw2, "SNARE.WAV"); break;      
         default: break;
       }
   };
+  
+  sequencer2->onevent = [] (sequencerevent *event) {
+      switch(event->channel) {
+        case 0: 
+          if (event->isNoteStartEvent) {
+            sine1.frequency( event->rate * 65.41);
+            envelope1.noteOn();
+          } else {
+            envelope1.noteOff();
+          }
+        default: break;
+      }
+  };
+  
 ```
 * add pattern:
 ``` c
