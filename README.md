@@ -1,16 +1,20 @@
 # teensyquencer
 ![Version 1.9](https://img.shields.io/badge/warning-work_in_progress-brightgreen.svg?label=warning&colorA=555555&colorB=ff4a88)
 
-A multi-channel loop pattern sequencer for teensy
-* each channel loops independently and own lenth
+Experimental multi-channel sequencer for teensy
+* each channel has a number of patterns. each pattern has its own length
 * setting next pattern on a channel will take effect once current pattern on that channel is complete.
 * Im using an akai apc40 controller to select patterns for channels - please fork and adapt to your own controller...
 * comming soon - star this repo if you want to see these features
   * ~~midi import~~ and export
-  * playing samples at different pitches
+  * ~~playing samples at different pitches~~
   * parameter, midi, audio recording and playback
  
 ![Audio signal path](AudioPath.png)
+
+## dependencies
+* [Audio library](https://github.com/PaulStoffregen/Audio)
+* [Avariable playback rate for teensy audio library](https://github.com/newdigate/teensy-variable-playback)
 
 [![teensy-quencer on youtube](https://img.youtube.com/vi/eEeuXfxMdCI/0.jpg)](https://www.youtube.com/watch?v=eEeuXfxMdCI)
 
