@@ -14,7 +14,7 @@ Experimental multi-channel sequencer for teensy
 
 ## dependencies
 * [Audio library](https://github.com/PaulStoffregen/Audio)
-* [Avariable playback rate for teensy audio library](https://github.com/newdigate/teensy-variable-playback)
+* [variable playback rate for teensy audio library](https://github.com/newdigate/teensy-variable-playback)
 
 [![teensy-quencer on youtube](https://img.youtube.com/vi/eEeuXfxMdCI/0.jpg)](https://www.youtube.com/watch?v=eEeuXfxMdCI)
 
