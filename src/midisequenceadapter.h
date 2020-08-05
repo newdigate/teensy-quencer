@@ -53,7 +53,7 @@ public:
     }
 
     static double calcPitchFactor(uint8_t note, int transpose) {
-        double result = pow(2.0, (note-60+transpose) / 12.0);
+        double result = pow(2.0, (note-48+transpose) / 12.0);
         return result;
     }
 
