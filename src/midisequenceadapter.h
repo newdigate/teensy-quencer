@@ -43,17 +43,15 @@ public:
             event->channel = 0;
             event->position = totalTicks;
             event->isNoteStartEvent = (message.status & 0xF0) == 0x90 && message.velocity > 0;
-            event->rate = calcPitchFactor(message.key, transpose);
-
-            //Serial.printf("total ticks: %d - (ch:%d, pos:%d, noteOn:%x, rate:%.2f)\r\n", totalTicks, event->channel, event->position, event->isNoteStartEvent, event->rate);
+            event->noteNumber = message.key + transpose;
+            event->velocity = message.velocity;
 
             sequencer->addevent(patternNumber, event );
         }
-        sequencer->closeAllPendingEvents(patternNumber);
     }
 
     static double calcPitchFactor(uint8_t note, int transpose) {
-        double result = pow(2.0, (note-48+transpose) / 12.0);
+        double result = pow(2.0, (note-36+transpose) / 12.0);
         return result;
     }
 
