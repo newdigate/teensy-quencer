@@ -37,31 +37,37 @@ int main(int argc, char **argv){
 
     std::cout << "complete...\n";
 }
+long polyphony = 0;
 
 void note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
     cout << "Note number 1:" << std::to_string(noteNumber) << " v:" <<  std::to_string(velocity) << " on:" <<  std::to_string(isNoteOn)  << "\n";
+    if (isNoteOn) polyphony++; else polyphony--;
 }
 void note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
     cout << "Note number 2:" << std::to_string(noteNumber) << " v:" <<  std::to_string(velocity) << " on:" <<  std::to_string(isNoteOn)  << "\n";
+    if (isNoteOn) polyphony++; else polyphony--;
 }
 void note3(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
     cout << "Note number 3:" << std::to_string(noteNumber) << " v:" <<  std::to_string(velocity) << " on:" <<  std::to_string(isNoteOn)  << "\n";
+    if (isNoteOn) polyphony++; else polyphony--;
 }
 void note4(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
     cout << "Note number 4:" << std::to_string(noteNumber) << " v:" <<  std::to_string(velocity) << " on:" <<  std::to_string(isNoteOn)  << "\n";
+    if (isNoteOn) polyphony++; else polyphony--;
 }
 
 void polyphonicsampler_test() {
     polyphonicsampler s;
+    polyphony = 0;
 
     char *buffer = (char *)&guitar2_mid[0];
     SD.setSDCardFileData(buffer, guitar2_mid_len);
 
     const int numBars = 128;
     s.pushNoteFunction( note1 );
-    s.pushNoteFunction(  note2);
-    s.pushNoteFunction( note3);
-    s.pushNoteFunction(  note4);
+    s.pushNoteFunction( note2 );
+    s.pushNoteFunction( note3 );
+    s.pushNoteFunction( note4 );
 
     midireader midifileReader;
     midifileReader.open("any.mid");
@@ -79,6 +85,7 @@ void polyphonicsampler_test() {
             s.noteOn( noteNumber, 30);
         else
             s.noteOff( noteNumber);
+        Serial.printf("polyphony: %d\n", polyphony);
     }
 
 }

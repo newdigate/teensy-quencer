@@ -22,8 +22,9 @@ public:
 
     void noteOn(uint8_t noteNumber, uint8_t velocity) {
         if (activeNotes[noteNumber] == 255) {
+            // note is not active
             int nextFreeVoice = getFirstFreeVoice();
-            if ((nextFreeVoice < 16) && (nextFreeVoice < noteOnFns.size())) {
+            if (nextFreeVoice < noteOnFns.size()) {
                 activeVoices[nextFreeVoice] = noteNumber;
                 activeNotes[noteNumber] = nextFreeVoice;
                 if ( nextFreeVoice < noteOnFns.size() ){
@@ -31,22 +32,22 @@ public:
                     noteOnFunction(noteNumber, velocity, true);
                 }
             }
+        } else {
+            // note is already active, just re-trigger it...
         }
     }
 
     void noteOff(uint8_t noteNumber) {
-        for (int i=0; i < 16; i++) {
-            if (activeVoices[i] == noteNumber) {
-                if (activeNotes[noteNumber] != 255) {
-                    uint8_t channel = activeNotes[noteNumber];
-                    function<void(uint8_t noteNumber, uint8_t velocity, bool isNoteOn)> noteOnFunction = noteOnFns[channel];
-                    noteOnFunction(noteNumber, 0, false);
-                }
-                activeNotes[noteNumber] = 255;
-                activeVoices[i] = 255; // free the voice
-                return;
-            }
+        uint8_t index = activeNotes[noteNumber];
+        if (index == 255) {
+            // note is not active, ignore
+            return;
         }
+
+        function<void(uint8_t noteNumber, uint8_t velocity, bool isNoteOn)> noteOnFunction = noteOnFns[index];
+        noteOnFunction(noteNumber, 0, false);
+        activeNotes[noteNumber] = 255;
+        activeVoices[index] = 255; // free the voice
     }
 
     void pushNoteFunction (const function<void(uint8_t noteNumber, uint8_t velocity, bool isNoteOn)> &noteOnFunction) {

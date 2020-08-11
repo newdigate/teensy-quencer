@@ -181,11 +181,13 @@ bool midireader::read(midimessage &midiMessage) {
                 midiMessage.velocity = velocity;
                 midiMessage.channel = channel;
 
+                /*
                 Serial.printf("delta: 0x%04x (%04d) \t\t\tst:(%02x): %s \t\t\t ch:%02d \tkey:%03d \tvel:%03d\n",
                               midiMessage.delta_ticks, midiMessage.delta_ticks,
                               midiMessage.status, voice_message_status_name(midiMessage.status),
                               midiMessage.channel + 1,
                               midiMessage.key, midiMessage.velocity);
+                              */
                 return true;
             } else {
 
