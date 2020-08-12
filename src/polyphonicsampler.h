@@ -5,11 +5,11 @@
 #ifndef TEENSYSEQUENCER_POLYPHONICSAMPLER_H
 #define TEENSYSEQUENCER_POLYPHONICSAMPLER_H
 
-#include <functional>
-#include <vector>
 #include "sequencer.h"
 
-using namespace std;
+#define MAX_VOICES 16
+
+typedef void (*noteEventCallback)(uint8_t noteNumber, uint8_t velocity, bool isNoteOn);
 
 class polyphonicsampler {
 public:
@@ -21,19 +21,25 @@ public:
     }
 
     void noteOn(uint8_t noteNumber, uint8_t velocity) {
+        int indexOfVoice = 255;
         if (activeNotes[noteNumber] == 255) {
-            // note is not active
-            int nextFreeVoice = getFirstFreeVoice();
-            if (nextFreeVoice < noteOnFns.size()) {
-                activeVoices[nextFreeVoice] = noteNumber;
-                activeNotes[noteNumber] = nextFreeVoice;
-                if ( nextFreeVoice < noteOnFns.size() ){
-                    function<void(uint8_t noteNumber, uint8_t velocity, bool isNoteOn)> noteOnFunction = noteOnFns[nextFreeVoice];
-                    noteOnFunction(noteNumber, velocity, true);
-                }
+            // note is not active, allocate a voice if possible
+            indexOfVoice = getFirstFreeVoice();
+            if (indexOfVoice < numVoices) {
+                activeVoices[indexOfVoice] = noteNumber;
+                activeNotes[noteNumber] = indexOfVoice;
+            } else
+            {
+                // note dropped: insufficient polyphony to play this note
+                indexOfVoice = 255;
             }
         } else {
             // note is already active, just re-trigger it...
+            indexOfVoice = activeNotes[noteNumber];
+        }
+        if (indexOfVoice != 255) {
+            noteEventCallback noteOnFunction = noteOnFns[indexOfVoice];
+            noteOnFunction(noteNumber, velocity, true);
         }
     }
 
@@ -44,23 +50,25 @@ public:
             return;
         }
 
-        function<void(uint8_t noteNumber, uint8_t velocity, bool isNoteOn)> noteOnFunction = noteOnFns[index];
+        noteEventCallback noteOnFunction = noteOnFns[index];
         noteOnFunction(noteNumber, 0, false);
         activeNotes[noteNumber] = 255;
         activeVoices[index] = 255; // free the voice
     }
 
-    void pushNoteFunction (const function<void(uint8_t noteNumber, uint8_t velocity, bool isNoteOn)> &noteOnFunction) {
-        noteOnFns.push_back(  noteOnFunction );
+    void pushNoteFunction (const noteEventCallback &noteOnFunction) {
+        noteOnFns[numVoices] =  noteOnFunction;
+        numVoices++;
     }
 
 private:
-    vector<function<void(uint8_t noteNumber, uint8_t velocity, bool isNoteOn)>> noteOnFns;
+    noteEventCallback noteOnFns[MAX_VOICES];
     uint8_t activeNotes[128];
-    uint8_t activeVoices[16];
+    uint8_t activeVoices[MAX_VOICES];
+    uint8_t numVoices = 0;
 
     uint8_t getFirstFreeVoice() {
-        for (int i=0; i < 16; i++) {
+        for (int i=0; i < numVoices; i++) {
             if (activeVoices[i] == 255) {
                 return i;
             }
