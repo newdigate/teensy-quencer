@@ -9,13 +9,13 @@
 #include "src/midireader.h"
 #include "src/midisequenceadapter.h"
 #include "src/polyphonicsampler.h"
+
 #include <USBHost_t36.h>
 
-#include <Adafruit_GFX.h>    // Core graphics library
 #include <ST7735_t3.h> // Hardware-specific library
 #define TFT_CS   6  // CS & DC can use pins 2, 6, 9, 10, 15, 20, 21, 22, 23
 #define TFT_DC    2  //  but certain pairs must NOT be used: 2+10, 6+9, 20+23, 21+22
-#define TFT_RST   0 // RST can use any pin
+#define TFT_RST   255 // RST can use any pin
 ST7735_t3 tft = ST7735_t3(TFT_CS, TFT_DC, TFT_RST);
 
 USBHost myusb;
@@ -26,281 +26,169 @@ tempo tempo(100.0f);
 multisequencer multisequencer(tempo);
 midisequenceadapter adapter(multisequencer);
 
-// GUItool: begin automatically generated code
-AudioPlaySdWav           playSdRaw7;     //xy=782.1388702392578,236.66666269302368
-AudioPlaySdWav           playSdRaw8;     //xy=783.6944465637207,431.25000381469727
+sequencer *guitar1sequencer;
+sequencer *guitar2sequencer;
+sequencer *guitar3sequencer;
+sequencer *guitar4sequencer;
 
-AudioPlaySdWavResmp           playSdRaw6;     //xy=411.50000762939453,473.25000953674316
-AudioPlaySdWavResmp           playSdRaw3;     //xy=421.00000762939453,319.5000047683716
-AudioPlaySdWavResmp           playSdRaw2;     //xy=429.25000762939453,240.50000381469727
-AudioPlaySdWavResmp           playSdRaw4;     //xy=431.00000762939453,363.2500057220459
-AudioPlaySdWavResmp           playSdRaw5;     //xy=432.00000762939453,423.5000057220459
-AudioPlaySdWavResmp           playSdRaw1;     //xy=435.25000762939453,169.25000095367432
+polyphonicsampler guitar1;
+polyphonicsampler guitar2;
+polyphonicsampler guitar3;
+polyphonicsampler guitar4;
+
+uint8_t polyphony = 0;
+uint8_t currentSelectedTrack = 0;
+
+#include "TFTPianoDisplay.h"
+TFTPianoDisplay pianoDisplay1a(tft, 3, 3, 0, 0); //tft, byte octaves, byte startOctave, byte x, byte y
+TFTPianoDisplay pianoDisplay1b(tft, 3, 6, 0, 16); //tft, byte octaves, byte startOctave, byte x, byte y
+
+TFTPianoDisplay pianoDisplay2a(tft, 3, 3, 0, 32); //tft, byte octaves, byte startOctave, byte x, byte y
+TFTPianoDisplay pianoDisplay2b(tft, 3, 6, 0, 48); //tft, byte octaves, byte startOctave, byte x, byte y
+
+TFTPianoDisplay pianoDisplay3a(tft, 3, 3, 0, 64); //tft, byte octaves, byte startOctave, byte x, byte y
+TFTPianoDisplay pianoDisplay3b(tft, 3, 6, 0, 80); //tft, byte octaves, byte startOctave, byte x, byte y
+
+TFTPianoDisplay pianoDisplay4a(tft, 3, 3, 0, 94); //tft, byte octaves, byte startOctave, byte x, byte y
+TFTPianoDisplay pianoDisplay4b(tft, 3, 6, 0, 110); //tft, byte octaves, byte startOctave, byte x, byte y
 
 // GUItool: begin automatically generated code
-AudioSynthNoiseWhite     noise1;         //xy=55,306
-AudioSynthKarplusStrong  string1;        //xy=85.88887023925781,516.4088134765625
-AudioFilterStateVariable filter1;        //xy=189,308
-AudioSynthKarplusStrong  string6;        //xy=203,883
-AudioSynthKarplusStrong  string5;        //xy=219,820
-AudioMixer4              mixer19;        //xy=234,553
-AudioSynthKarplusStrong  string4;        //xy=235,774
-AudioSynthKarplusStrong  string3;        //xy=240.22222900390625,723
-AudioSynthKarplusStrong  string2;        //xy=242.33334350585938,673.6666870117188
-AudioMixer4              mixer18;        //xy=313,156
-AudioMixer4              mixer13;        //xy=334,299
-AudioEffectBitcrusher    bitcrusher6;    //xy=376,883
-AudioEffectBitcrusher    bitcrusher5;    //xy=385,825
-AudioEffectBitcrusher    bitcrusher4;    //xy=391,769
-AudioEffectBitcrusher    bitcrusher3;    //xy=394,705
-AudioEffectBitcrusher    bitcrusher2;    //xy=395,658
-AudioSynthWaveformSine   sine1;          //xy=412.00000762939453,547.2500095367432
-AudioEffectBitcrusher    bitcrusher1;    //xy=435.55550956726074,611.1111831665039
-AudioEffectEnvelope      envelope2;      //xy=577.75,194.74999713897705
-AudioMixer4              mixer17;        //xy=582,795
-AudioMixer4              mixer14;        //xy=583.6666870117188,725.7777709960938
-AudioEffectEnvelope      envelope3;      //xy=586.7500076293945,311.75000286102295
-AudioEffectEnvelope      envelope4;      //xy=589,357
-AudioEffectEnvelope      envelope6;      //xy=590.5,466.25
-AudioEffectEnvelope      envelope7;      //xy=592.5,547.25
-AudioEffectEnvelope      envelope1;      //xy=596.25,85.5
-AudioEffectEnvelope      envelope5;      //xy=596,417
-AudioEffectEnvelope      envelope8;      //xy=603.6110076904297,606.0914134979248
-AudioEffectFlange        flange1;        //xy=733,606
-AudioMixer4              mixer7;         //xy=793.7500038146973,371.5000066757202
-AudioMixer4              mixer3;         //xy=795.7500038146973,306.5000066757202
-AudioInputTDM            tdm1;           //xy=961.7500038146973,396.5000066757202
-AudioMixer4              mixer1;         //xy=962.7500038146973,239.50000667572021
-AudioMixer4              mixer15;        //xy=963.7500038146973,175.50000667572021
-AudioMixer4              mixer16;        //xy=964.7500038146973,622.5000066757202
-AudioMixer4              mixer2;         //xy=965.7500038146973,556.5000066757202
-AudioMixer4              mixer4;         //xy=1174.7500038146973,122.50000667572021
-AudioMixer4              mixer10;        //xy=1173.7500038146973,573.5000066757202
-AudioMixer4              mixer6;         //xy=1176.7500038146973,183.50000667572021
-AudioMixer4              mixer9;         //xy=1176.7500038146973,244.50000667572021
-AudioMixer4              mixer8;         //xy=1175.7500038146973,508.5000066757202
-AudioMixer4              mixer11;        //xy=1176.7500038146973,305.5000066757202
-AudioMixer4              mixer5;         //xy=1177.7500038146973,444.5000066757202
-AudioMixer4              mixer12;        //xy=1180.7500038146973,637.5000066757202
-AudioOutputTDM           tdm3;           //xy=1379.7500038146973,420.5000066757202
-AudioConnection          patchCord1(noise1, 0, filter1, 0);
-AudioConnection          patchCord2(noise1, 0, mixer18, 0);
-AudioConnection          patchCord3(playSdRaw3, 0, mixer13, 0);
-AudioConnection          patchCord4(string1, 0, mixer19, 0);
-AudioConnection          patchCord5(playSdRaw2, 0, mixer18, 1);
-AudioConnection          patchCord6(filter1, 2, mixer13, 1);
-AudioConnection          patchCord7(string6, bitcrusher6);
-AudioConnection          patchCord8(string5, bitcrusher5);
-AudioConnection          patchCord9(mixer19, bitcrusher1);
-AudioConnection          patchCord10(string4, bitcrusher4);
-AudioConnection          patchCord11(string3, bitcrusher3);
-AudioConnection          patchCord12(string2, bitcrusher2);
-AudioConnection          patchCord13(mixer18, envelope2);
-AudioConnection          patchCord14(mixer13, envelope3);
-AudioConnection          patchCord15(bitcrusher6, 0, mixer17, 0);
-AudioConnection          patchCord16(bitcrusher5, 0, mixer14, 3);
-AudioConnection          patchCord17(bitcrusher4, 0, mixer14, 2);
-AudioConnection          patchCord18(bitcrusher3, 0, mixer14, 1);
-AudioConnection          patchCord19(bitcrusher2, 0, mixer14, 0);
-AudioConnection          patchCord20(playSdRaw6, 0, envelope6, 0);
-AudioConnection          patchCord21(sine1, envelope7);
-AudioConnection          patchCord22(playSdRaw1, 0, envelope1, 0);
-AudioConnection          patchCord23(playSdRaw4, 0, envelope4, 0);
-AudioConnection          patchCord24(playSdRaw5, 0, envelope5, 0);
-AudioConnection          patchCord25(bitcrusher1, envelope8);
-AudioConnection          patchCord26(envelope2, 0, mixer3, 1);
-AudioConnection          patchCord27(mixer17, 0, mixer15, 3);
-AudioConnection          patchCord28(mixer17, 0, mixer16, 2);
-AudioConnection          patchCord29(mixer14, 0, mixer15, 2);
-AudioConnection          patchCord30(mixer14, 0, mixer2, 2);
-AudioConnection          patchCord31(envelope3, 0, mixer3, 2);
-AudioConnection          patchCord32(envelope4, 0, mixer3, 3);
-AudioConnection          patchCord33(envelope6, 0, mixer7, 1);
-AudioConnection          patchCord34(envelope7, 0, mixer7, 2);
-AudioConnection          patchCord35(envelope1, 0, mixer3, 0);
-AudioConnection          patchCord36(envelope5, 0, mixer7, 0);
-AudioConnection          patchCord37(envelope8, flange1);
-AudioConnection          patchCord38(flange1, 0, mixer16, 3);
-AudioConnection          patchCord39(flange1, 0, mixer1, 3);
-AudioConnection          patchCord40(playSdRaw7, 0, mixer15, 0);
-AudioConnection          patchCord41(playSdRaw7, 1, mixer16, 0);
-AudioConnection          patchCord42(playSdRaw8, 0, mixer15, 1);
-AudioConnection          patchCord43(playSdRaw8, 1, mixer16, 1);
-AudioConnection          patchCord44(mixer7, 0, mixer1, 1);
-AudioConnection          patchCord45(mixer7, 0, mixer2, 1);
-AudioConnection          patchCord46(mixer3, 0, mixer1, 0);
-AudioConnection          patchCord47(mixer3, 0, mixer2, 0);
-AudioConnection          patchCord48(tdm1, 0, mixer4, 1);
-AudioConnection          patchCord49(tdm1, 2, mixer5, 0);
-AudioConnection          patchCord50(tdm1, 4, mixer6, 0);
-AudioConnection          patchCord51(tdm1, 6, mixer8, 0);
-AudioConnection          patchCord52(tdm1, 8, mixer9, 0);
-AudioConnection          patchCord53(tdm1, 10, mixer10, 0);
-AudioConnection          patchCord54(mixer1, 0, mixer4, 0);
-AudioConnection          patchCord55(mixer1, 0, mixer6, 1);
-AudioConnection          patchCord56(mixer1, 0, mixer9, 1);
-AudioConnection          patchCord57(mixer1, 0, mixer11, 1);
-AudioConnection          patchCord58(mixer15, 0, mixer4, 2);
-AudioConnection          patchCord59(mixer15, 0, mixer6, 2);
-AudioConnection          patchCord60(mixer15, 0, mixer9, 2);
-AudioConnection          patchCord61(mixer15, 0, mixer11, 2);
-AudioConnection          patchCord62(mixer16, 0, mixer5, 2);
-AudioConnection          patchCord63(mixer16, 0, mixer8, 2);
-AudioConnection          patchCord64(mixer16, 0, mixer10, 2);
-AudioConnection          patchCord65(mixer16, 0, mixer12, 2);
-AudioConnection          patchCord66(mixer2, 0, mixer5, 1);
-AudioConnection          patchCord67(mixer2, 0, mixer8, 1);
-AudioConnection          patchCord68(mixer2, 0, mixer10, 1);
-AudioConnection          patchCord69(mixer2, 0, mixer12, 1);
-AudioConnection          patchCord70(mixer4, 0, tdm3, 0);
-AudioConnection          patchCord71(mixer10, 0, tdm3, 10);
-AudioConnection          patchCord72(mixer6, 0, tdm3, 4);
-AudioConnection          patchCord73(mixer9, 0, tdm3, 8);
-AudioConnection          patchCord74(mixer8, 0, tdm3, 6);
-AudioConnection          patchCord75(mixer11, 0, tdm3, 12);
-AudioConnection          patchCord76(mixer5, 0, tdm3, 2);
-AudioConnection          patchCord77(mixer12, 0, tdm3, 14);
-AudioControlCS42448      cs42448_1;      //xy=961.7936096191406,698.3174142837524
+AudioSynthKarplusStrong  string4f;       //xy=210,575
+AudioSynthKarplusStrong  string1b;        //xy=213,87
+AudioSynthKarplusStrong  string4c;        //xy=212,466
+AudioSynthKarplusStrong  string4g;       //xy=212,612
+AudioSynthKarplusStrong  string4b;        //xy=213,430
+AudioSynthKarplusStrong  string4d;       //xy=213,501
+AudioSynthKarplusStrong  string4e;       //xy=213,538
+AudioSynthKarplusStrong  string1a;        //xy=216,46
+AudioSynthKarplusStrong  string4a;        //xy=215,390
+AudioSynthKarplusStrong  string3a;        //xy=232,267
+AudioSynthKarplusStrong  string3b;        //xy=236,302
+AudioSynthKarplusStrong  string2a;        //xy=251,154
+AudioSynthKarplusStrong  string2b;        //xy=252,188
+AudioEffectEnvelope      envelope4g;     //xy=382,619
+AudioEffectEnvelope      envelope4f;      //xy=383,580
+AudioEffectEnvelope      envelope4d;      //xy=386,504
+AudioEffectEnvelope      envelope4a;      //xy=387,375
+AudioEffectEnvelope      envelope4e;      //xy=387,543
+AudioEffectEnvelope      envelope4b;      //xy=388,423
+AudioEffectEnvelope      envelope4c;      //xy=389,467
+AudioEffectEnvelope      envelope3b;     //xy=411,304
+AudioEffectEnvelope      envelope3a;      //xy=412.75,265.75
+AudioEffectEnvelope      envelope2a;      //xy=429.75,149.75
+AudioEffectEnvelope      envelope2b;     //xy=430,187
+AudioEffectEnvelope      envelope1a;      //xy=444.25,55.5
+AudioEffectEnvelope      envelope1b;     //xy=446,93
+AudioMixer4              mixer3;         //xy=565,298
+AudioMixer4              mixer4b;         //xy=596,559
+AudioMixer4              mixer2;         //xy=602,176
+AudioMixer4              mixer1;         //xy=603,77
+AudioMixer4              mixer4a;         //xy=616,414
+AudioMixer4              mixer10;         //xy=783.75,191.5
+AudioMixer4              mixerL;         //xy=958.75,194.5
+AudioMixer4              mixerR;         //xy=960.75,376.5
+AudioOutputTDM           tdmOUT;           //xy=1156.75,292.5
+AudioConnection          patchCord1(string4f, envelope4f);
+AudioConnection          patchCord2(string1b, envelope1b);
+AudioConnection          patchCord3(string4c, envelope4c);
+AudioConnection          patchCord4(string4g, envelope4g);
+AudioConnection          patchCord5(string4b, envelope4b);
+AudioConnection          patchCord6(string4d, envelope4d);
+AudioConnection          patchCord7(string4e, envelope4e);
+AudioConnection          patchCord8(string1a, envelope1a);
+AudioConnection          patchCord9(string4a, envelope4a);
+AudioConnection          patchCord10(string3a, envelope3a);
+AudioConnection          patchCord11(string3b, envelope3b);
+AudioConnection          patchCord12(string2a, envelope2a);
+AudioConnection          patchCord13(string2b, envelope2b);
+AudioConnection          patchCord14(envelope4g, 0, mixer4b, 2);
+AudioConnection          patchCord15(envelope4f, 0, mixer4b, 1);
+AudioConnection          patchCord16(envelope4d, 0, mixer4a, 3);
+AudioConnection          patchCord17(envelope4a, 0, mixer4a, 0);
+AudioConnection          patchCord18(envelope4e, 0, mixer4b, 0);
+AudioConnection          patchCord19(envelope4b, 0, mixer4a, 1);
+AudioConnection          patchCord20(envelope4c, 0, mixer4a, 2);
+AudioConnection          patchCord21(envelope3b, 0, mixer3, 1);
+AudioConnection          patchCord22(envelope3a, 0, mixer3, 0);
+AudioConnection          patchCord23(envelope2a, 0, mixer2, 0);
+AudioConnection          patchCord24(envelope2b, 0, mixer2, 1);
+AudioConnection          patchCord25(envelope1a, 0, mixer1, 0);
+AudioConnection          patchCord26(envelope1b, 0, mixer1, 1);
+AudioConnection          patchCord27(mixer3, 0, mixer10, 2);
+AudioConnection          patchCord28(mixer4b, 0, mixerL, 2);
+AudioConnection          patchCord29(mixer4b, 0, mixerR, 2);
+AudioConnection          patchCord30(mixer2, 0, mixer10, 1);
+AudioConnection          patchCord31(mixer1, 0, mixer10, 0);
+AudioConnection          patchCord32(mixer4a, 0, mixerL, 1);
+AudioConnection          patchCord33(mixer4a, 0, mixerR, 1);
+AudioConnection          patchCord34(mixer10, 0, mixerL, 0);
+AudioConnection          patchCord35(mixer10, 0, mixerR, 0);
+AudioConnection          patchCord36(mixerL, 0, tdmOUT, 0);
+AudioConnection          patchCord37(mixerL, 0, tdmOUT, 4);
+AudioConnection          patchCord38(mixerL, 0, tdmOUT, 8);
+AudioConnection          patchCord39(mixerL, 0, tdmOUT, 12);
+AudioConnection          patchCord40(mixerR, 0, tdmOUT, 2);
+AudioConnection          patchCord41(mixerR, 0, tdmOUT, 6);
+AudioConnection          patchCord42(mixerR, 0, tdmOUT, 10);
+AudioConnection          patchCord43(mixerR, 0, tdmOUT, 14);
+AudioControlCS42448      cs42448_1;      //xy=851.7935791015625,607.3174438476562
 // GUItool: end automatically generated code
-
-
-
-// Number of samples in each delay line
-#define FLANGE_DELAY_LENGTH (6*AUDIO_BLOCK_SAMPLES)
-short delayline[FLANGE_DELAY_LENGTH];
-
-int s_idx = FLANGE_DELAY_LENGTH/4;
-int s_depth = FLANGE_DELAY_LENGTH/4;
-double s_freq = 0.25;
-
-double calcPitchFactor(uint8_t note) {
-    double result = pow(2.0, (note-36) / 12.0);
-    return result;
-}
 
 double calcFrequency(uint8_t note) {
     double result = 440.0 * pow(2.0, (note-69) / 12.0);
     return result;
 }
 
-String longfxnames[2] = {"LONGFX01.wav", "LONGFX02.wav"}; 
-String fxnames[18] = {"FX01.wav", "FX02.wav", "FX03.wav", "FX04.wav", "FX05.wav", "FX06.wav", "FX07.wav", "FX09.wav","FX10.wav", "FX21.wav", "FX28.wav","FX30.wav","FX34.wav","FX35.wav","FX40.wav","FX77.wav", "HIT1.wav", "HIT2.wav"}; 
-String bassslidenames[11] = {"BASSSL01.wav", "BASSSL02.wav","BASSSL03.wav","BASSSL04.wav", "BASSSL05.wav", "BASSSL06.wav","BASSSL07.wav","BASSSL08.wav","BASSSL09.wav","BASSSL10.wav","BASSSL11.wav"}; 
-
-void playSample(AudioPlaySdWavResmp &audio, String s, double rate) {
-  if (audio.isPlaying())
-    audio.stop();
-  audio.setPlaybackRate(rate);
-  audio.play(s.c_str());
+void guitar_note(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, AudioSynthKarplusStrong &stringVoice, AudioEffectEnvelope &envelope){
+    if (isNoteOn) {
+      polyphony++;
+      double f = calcFrequency(noteNumber);
+      envelope.noteOn();
+      stringVoice.noteOn(f, velocity/128.0);
+    } else {
+      stringVoice.noteOff(0);
+      envelope.noteOff();
+      polyphony--;
+    }
 }
 
-void stopSample(AudioPlaySdWavResmp &audio) {
-  if (audio.isPlaying())
-    audio.stop();            
-}
+void guitar1_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string1a, envelope1a); }
+void guitar1_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string1b, envelope1b); }
 
-void triggerAudioEvent(sequencerevent *event, AudioPlaySdWavResmp &audio, String filename, AudioMixer4 &mixer, unsigned char mixerChannel) {
+void guitar2_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string2a, envelope2a); }
+void guitar2_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string2b, envelope1b); }
+
+void guitar3_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string3a, envelope3a); }
+void guitar3_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string3a, envelope3b); }
+
+void guitar4_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4a, envelope4a); }
+void guitar4_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4b, envelope4b); }
+void guitar4_note3(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4c, envelope4c); }
+void guitar4_note4(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4d, envelope4d); }
+void guitar4_note5(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4e, envelope4e); }
+void guitar4_note6(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4f, envelope4f); }
+void guitar4_note7(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4g, envelope4g); }
+
+
+void sequenceGuitarEvent( sequencerevent *event, polyphonicsampler &sampler, TFTPianoDisplay &tftPianoDisplay1, TFTPianoDisplay &tftPianoDisplay2) {
   if (event->isNoteStartEvent) {
-    double rate = calcPitchFactor(event->noteNumber);
-    mixer.gain(mixerChannel, event->velocity/128.0);
-    playSample(audio, filename, rate);
-  } else 
-    stopSample(audio);
-}
-
-
-
-
-void playSample(AudioPlaySdWav &audio, String s) {
-  if (audio.isPlaying())
-    audio.stop();
-  audio.play(s.c_str());
-}
-
-void stopSample(AudioPlaySdWav &audio) {
-  if (audio.isPlaying())
-    audio.stop();            
-}
-
-void triggerAudioEvent(sequencerevent *event, AudioPlaySdWav &audio, String filename) {
-  if (event->isNoteStartEvent) {
-    playSample(audio, filename);
-  } else 
-    stopSample(audio);
-}
-
-sequencer *beatsequencer;
-sequencer *snaresequencer;
-sequencer *hatsequencer;
-sequencer *basssequencer;
-sequencer *fxsequencer;
-sequencer *crashsequencer;
-sequencer *longfxsequencer;
-sequencer *voicesequencer;
-sequencer *guitarsequencer;
-
-polyphonicsampler guitar;
-uint8_t polyphony = 0;
-
-void note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-      polyphony++;
-      double f = calcFrequency(noteNumber);
-      string2.noteOn(f, velocity/128.0);
-    } else {
-      string2.noteOff(0);      
-      polyphony--;
-    }
-}
-void note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-      polyphony++;
-      double f = calcFrequency(noteNumber);
-      string3.noteOn(f, velocity/128.0);
-    } else {
-      string3.noteOff(0);      
-      polyphony--;
-    }
-}
-void note3(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-      polyphony++;
-      double f = calcFrequency(noteNumber);
-      string4.noteOn(f, velocity/128.0);
-    } else {
-      string4.noteOff(0);      
-      polyphony--;
-    }
-}
-void note4(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-      polyphony++;
-      double f = calcFrequency(noteNumber);
-      string5.noteOn(f, velocity/128.0);
-    } else {
-      string5.noteOff(0);      
-      polyphony--;
-    }
-}
-void note5(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-      polyphony++;
-      double f = calcFrequency(noteNumber);
-      string6.noteOn(f, velocity/128.0);
-    } else {
-      string6.noteOff(0);      
-      polyphony--;
-    }
-}
+    sampler.noteOn(event->noteNumber, event->velocity);
+    tftPianoDisplay1.keyDown(event->noteNumber);
+    tftPianoDisplay2.keyDown(event->noteNumber);
+  } else {
+    sampler.noteOff(event->noteNumber);
+    tftPianoDisplay1.keyUp(event->noteNumber);
+    tftPianoDisplay2.keyUp(event->noteNumber);
+  }
+};
 
 void setup() {
   AudioNoInterrupts();  // disable audio library momentarily
-  AudioMemory(100);
+  AudioMemory(60);
 
   SPI.begin();
   tft.initR(INITR_GREENTAB);
   tft.setRotation(3);
-  
   tft.fillScreen(ST7735_BLACK);
   tft.println("init..."); 
   
@@ -314,7 +202,6 @@ void setup() {
         Serial.println("Unable to access the SD card");
         delay(1000);
   }
-
 
   tft.println("sd..."); 
   myusb.begin();
@@ -357,283 +244,93 @@ void setup() {
   };
 
   tft.fillScreen(ST7735_BLACK);
-  //tft.println("guitar..."); 
   
-  guitar.pushNoteFunction( note1 );
-  guitar.pushNoteFunction( note2 );
-  guitar.pushNoteFunction( note3 );
-  guitar.pushNoteFunction( note4 );
-  guitar.pushNoteFunction( note5 );
+  guitar1.pushNoteFunction( guitar1_note1 );
+  guitar1.pushNoteFunction( guitar1_note2 );
+  
+  guitar2.pushNoteFunction( guitar2_note1 );
+  guitar2.pushNoteFunction( guitar2_note2 );
+
+  guitar3.pushNoteFunction( guitar3_note1 );
+  guitar3.pushNoteFunction( guitar3_note2 );
+
+  guitar4.pushNoteFunction( guitar4_note1 );
+  guitar4.pushNoteFunction( guitar4_note2 );
+  guitar4.pushNoteFunction( guitar4_note3 );
+  guitar4.pushNoteFunction( guitar4_note4 );
+  guitar4.pushNoteFunction( guitar4_note5 );
+  guitar4.pushNoteFunction( guitar4_note6 );
+  guitar4.pushNoteFunction( guitar4_note7 );
 
   tft.println("sequencer..."); 
   
-  beatsequencer = multisequencer.newSequencer();
-  snaresequencer = multisequencer.newSequencer();
-  hatsequencer = multisequencer.newSequencer();
-  basssequencer = multisequencer.newSequencer();
-  fxsequencer = multisequencer.newSequencer();
-  crashsequencer = multisequencer.newSequencer();
-  longfxsequencer = multisequencer.newSequencer();
-  voicesequencer = multisequencer.newSequencer();
-  guitarsequencer = multisequencer.newSequencer();
+  guitar1sequencer = multisequencer.newSequencer();
+  guitar2sequencer = multisequencer.newSequencer();
+  guitar3sequencer = multisequencer.newSequencer();
+  guitar4sequencer = multisequencer.newSequencer();
   
-  beatsequencer->onevent = [] (sequencerevent *event) {
-      switch(event->channel) {
-        case 0: 
-          if (event->isNoteStartEvent) {
-            envelope1.noteOn();
-            triggerAudioEvent(event, playSdRaw1, "KICK.WAV", mixer3, 0);
-          } else {
-            envelope1.noteOff();
-          }
-           break;      
-        default: break;
-      }
-  };
-
-  snaresequencer->onevent = [] (sequencerevent *event) {
-      switch(event->channel) {
-        case 0: 
-          if (event->isNoteStartEvent) {
-            envelope2.noteOn();
-            triggerAudioEvent(event, playSdRaw2, "SNARE.WAV", mixer3, 1);
-          } else {
-            envelope2.noteOff();
-          }
-           break;      
-        default: break;
-      }
-  };
-
-  hatsequencer->onevent = [] (sequencerevent *event) {
-      switch(event->channel) {
-        case 0: 
-          if (event->isNoteStartEvent) {
-            envelope3.noteOn();
-            triggerAudioEvent(event, playSdRaw3, "Hihat.WAV", mixer3, 2); 
-          } else {
-            envelope3.noteOff();
-          }         
-          break;
-        default: break;
-      }
-  };
-
-  basssequencer->onevent = [] (sequencerevent *event) {
-      switch(event->channel) {
-        case 0: 
-
-          if (event->isNoteStartEvent) {
-            double freq = calcFrequency(event->noteNumber);
-            sine1.frequency( freq );
-            sine1.amplitude( event->velocity / 255.0);
-            envelope7.noteOn();
-            envelope4.noteOn();
-            triggerAudioEvent(event, playSdRaw4, "BASS.WAV", mixer3, 3); 
-          } else {
-            envelope4.noteOff();
-            envelope7.noteOff();
-          }
-          
-          break;
-        case 1: 
-          int r = random(10); 
-          if (event->isNoteStartEvent) {
-            envelope5.noteOn();
-          } else {
-            envelope5.noteOff();
-          }
-          triggerAudioEvent(event, playSdRaw5, bassslidenames[r], mixer7, 0); break;
-        default: break;
-      }
-  };
-
-  fxsequencer->onevent = [] (sequencerevent *event) {
-      switch(event->channel) { 
-        case 0:
-          int r = random(17); 
-          if (event->isNoteStartEvent) {
-            envelope6.noteOn();
-          } else {
-            envelope6.noteOff();
-          }
-          triggerAudioEvent(event, playSdRaw6, fxnames[r], mixer7, 1); break;
-
-        default: break;
-      }
-  };
-
-  crashsequencer->onevent = [] (sequencerevent *event) {
-      switch(event->channel) { 
-        case 0: 
-          triggerAudioEvent(event, playSdRaw7, "CRASH.WAV"); break;
-        default: break;
-      }
-  };
-
-  longfxsequencer->onevent = [] (sequencerevent *event) {
-      switch(event->channel) { 
-        case 0:
-          int r = random(1); 
-          triggerAudioEvent(event, playSdRaw8, longfxnames[r]); break;
-        default: break;
-      }
-  };
-
-  voicesequencer->onevent = [] (sequencerevent *event) {
-      switch(event->channel) { 
-        case 0:
-         if (event->isNoteStartEvent) {
-           envelope8.noteOn();
-           double rate = calcFrequency(event->noteNumber);
-           string1.noteOn(rate, event->velocity/255.0);
-         } else {
-           envelope8.noteOff();
-           string1.noteOff(0.0);
-         }
-        break;
-
-        default: break;
-      }
-  };
-
-  guitarsequencer->onevent = [] (sequencerevent *event) {
-    //Serial.printf("Guitar: %d, on/off:%d ch:%d\n", event->noteNumber, event->isNoteStartEvent, event->channel);
-    switch(event->channel) { 
-        case 0:
-        if (event->isNoteStartEvent) {
-          guitar.noteOn(event->noteNumber, event->velocity / 2.0);
-        } else {
-          guitar.noteOff(event->noteNumber);
-        }
-        break;
-        default: break;
-      }
-  };
+  guitar1sequencer->onevent = [] (sequencerevent *event) { sequenceGuitarEvent(event, guitar1, pianoDisplay1a, pianoDisplay1b);  };
+  guitar2sequencer->onevent = [] (sequencerevent *event) { sequenceGuitarEvent(event, guitar2, pianoDisplay2a, pianoDisplay2b);  };
+  guitar3sequencer->onevent = [] (sequencerevent *event) { sequenceGuitarEvent(event, guitar3, pianoDisplay3a, pianoDisplay3b);  };
+  guitar4sequencer->onevent = [] (sequencerevent *event) { sequenceGuitarEvent(event, guitar4, pianoDisplay4a, pianoDisplay4b);  };
 
   int pattern = 0;
   int currentChannel = 0;
 
-  tft.println("beatsequencer..."); 
-  // beatsequencer
-  pattern = beatsequencer->addPattern(4); // no beat
+  // guitar 1 sequencer
+  pattern = guitar1sequencer->addPattern(4); // no beat
 
   pattern++;
-  adapter.loadMidi("kik.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 1);  // multicequencer channel number, midi track number, 8 bars long
-  adapter.close();
-  beatsequencer->setNextPattern(pattern);
+  adapter.loadMidi("innuendo.mid");
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 1, 35, 0);  // multicequencer channel number, midi track number, 35 bars long
+  guitar1sequencer->setNextPattern(pattern);
   
-  tft.println("snaresequencer..."); 
-  // snaresequencer
+  // guitar 2 sequencer
   currentChannel++;
-  pattern = snaresequencer->addPattern(4); // no beat 4 bars
+  pattern = guitar2sequencer->addPattern(4); // no beat 4 bars
   
   pattern++;
-  adapter.loadMidi("snare.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
-  adapter.close();
-
-  tft.println("hatssequencer.."); 
-  // hatsequencer
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 2, 35, 0);  // multicequencer channel number, midi track number, 35 bars long
+  guitar2sequencer->setNextPattern(pattern);
+  
+  // guitar 3 sequencer
   currentChannel++;
-  pattern = hatsequencer->addPattern(4); // no hats
+  pattern = guitar3sequencer->addPattern(4); // no hats
 
   pattern++;
-  adapter.loadMidi("hihat.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
-  adapter.close();
-  hatsequencer->setNextPattern(pattern);
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 3, 35, 0);  // multicequencer channel number, midi track number, 35 bars long
+  guitar3sequencer->setNextPattern(pattern);
 
-   tft.println("basssequencer.."); 
-  // basssequencer
+  // guitar 4 sequencer
   currentChannel++;
-  pattern = basssequencer->addPattern(4); // no bass
+  pattern = guitar4sequencer->addPattern(4); // no bass
 
   pattern++;
-  adapter.loadMidi("dredbass.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 0);
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 4, 35, 0);
   adapter.close();
-  basssequencer->setNextPattern(pattern);
+  guitar4sequencer->setNextPattern(pattern);
 
-  tft.println("fxsequencer.."); 
-  //fxsequencer
-  currentChannel++;
-  pattern = fxsequencer->addPattern(4); // no fx
+  envelope1a.delay(0);
+  envelope1b.delay(0);
+ 
+  envelope2a.delay(0);
+  envelope2b.delay(0);
 
-  tft.println("crashsequencer.."); 
-  //crashsequencer
-  currentChannel++;
-  pattern = crashsequencer->addPattern(8); // no crash
-        
-  //longfxsequencer
-  currentChannel++;
-  pattern = longfxsequencer->addPattern(8); // no long fx
+  envelope3a.delay(0);
+  envelope3b.delay(0);
 
-  tft.println("voicesequencer.."); 
-  //voicesequencer
-  currentChannel++;
-  pattern = voicesequencer->addPattern(4); // no long fx
+  envelope4a.delay(0);
+  envelope4b.delay(0);
+  envelope4c.delay(0);
+  envelope4d.delay(0);
+  envelope4e.delay(0);
+  envelope4f.delay(0);
+  envelope4g.delay(0);
 
-  pattern++;
-  adapter.loadMidi("guitar.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 0);
-  adapter.close();
-  voicesequencer->setNextPattern(pattern);
-
-  tft.println("guitar-sequencer...t1"); 
-  //guitar-esequencer
-  currentChannel++;
-  pattern = guitarsequencer->addPattern(4); // no long fx
-  
-  pattern++; 
-  adapter.loadMidi("guitar2.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 0);
-  adapter.close();
-  guitarsequencer->setNextPattern(pattern);
-
-  tft.println("fx params...");     
-  sine1.frequency(440);
-  sine1.amplitude(0.4);
-  envelope1.delay(0);
-
-  envelope2.delay(0);
-  envelope2.attack(0);
-  envelope2.hold(0);
-  envelope2.sustain(0);
-  envelope2.release(7);
-  
-  //hihat
-  envelope3.delay(0);
-  envelope3.attack(0);
-  envelope3.hold(0);
-  envelope3.sustain(0);
-  
-  envelope4.delay(0);
-  envelope5.delay(0);
-  envelope6.delay(0);
-  envelope7.delay(0);
-  envelope8.delay(0);
-
-  bitcrusher1.bits(16);
-  bitcrusher2.bits(16);
-  bitcrusher3.bits(16);
-  bitcrusher4.bits(16);
-  bitcrusher5.bits(16);
-  bitcrusher6.bits(16);
-
-  noise1.amplitude(0.8);
-  filter1.frequency(9000);
-
-  flange1.begin(delayline,FLANGE_DELAY_LENGTH,s_idx,s_depth,s_freq);
-  flange1.voices(s_idx,s_depth,s_freq);
-  
   tft.fillScreen(ST7735_BLACK);
   tft.println("multisequencer start..."); 
   multisequencer.start(micros());
-  printusage();
   AudioInterrupts();     
-  tft.println("AudioInterrupts()"); 
 }
 
 String inputChannel="", inString = ""; 
@@ -645,6 +342,26 @@ long bpmIndicatorTimer = 0;
 void loop() {
   myusb.Task();
   midi1.read();
+
+  if (pianoDisplay1a.displayNeedsUpdating())
+    pianoDisplay1a.drawPiano();
+  if (pianoDisplay1b.displayNeedsUpdating())
+    pianoDisplay1b.drawPiano();
+    
+  if (pianoDisplay2a.displayNeedsUpdating())
+    pianoDisplay2a.drawPiano();
+  if (pianoDisplay2b.displayNeedsUpdating())
+    pianoDisplay2b.drawPiano();
+    
+  if (pianoDisplay3a.displayNeedsUpdating())
+    pianoDisplay3a.drawPiano();
+  if (pianoDisplay3b.displayNeedsUpdating())
+    pianoDisplay3b.drawPiano();
+    
+  if (pianoDisplay4a.displayNeedsUpdating())
+    pianoDisplay4a.drawPiano();
+  if (pianoDisplay4b.displayNeedsUpdating())
+    pianoDisplay4b.drawPiano();
     
   bpmIndicatorTimer++;
   if (bpmIndicatorTimer == 100000){
@@ -667,49 +384,6 @@ void loop() {
   // put your main code here, to run repeatedly:
   multisequencer.tick(micros());
   
-
-  while (Serial.available()) {
-    char inChar = Serial.read();   
-    if (isDigit(inChar)) {
-      // convert the incoming byte to a char and add it to the string:
-      inString += (char)inChar;
-    }
-    if (inChar == '\n') {
-      if (inputChannelEntered == false) {
-        inputChannel = inString;
-        inputChannelEntered = true;
-        inString = "";
-      } else {
-
-        sequencer *currentSequencer = NULL;
-        switch (inputChannel.toInt()) {
-          case 0: currentSequencer = beatsequencer; break;
-          case 1: currentSequencer = snaresequencer; break;
-          case 2: currentSequencer = hatsequencer; break;
-          case 3: currentSequencer = basssequencer; break;
-          case 4: currentSequencer = fxsequencer; break;
-          case 5: currentSequencer = crashsequencer; break;
-          case 6: currentSequencer = longfxsequencer; break;
-          case 7: currentSequencer = voicesequencer; break;
-          case 8: currentSequencer = guitarsequencer; break;
-          default:
-            Serial.printf("invalid channel input (should be 0..8): %s\n", inputChannel);
-            break;
-        } 
-              
-        if (currentSequencer != NULL) {
-          Serial.printf("setting next patteren to %d\n", inString.toInt());
-          currentSequencer->setNextPattern(inString.toInt());
-          currentSequencer->writenoteslist(inString.toInt());
-        }
-        inString = "";
-        inputChannel = "";    
-        inputChannelEntered = false; 
-        printusage();
-      }
-    }
-  }
-
 }
 
 
@@ -726,15 +400,10 @@ void myNoteOn(byte channel, byte note, byte velocity) {
 
   sequencer *sequencer = NULL;
   switch (channel) {
-    case 1: sequencer = beatsequencer; break;
-    case 2: sequencer = snaresequencer; break;
-    case 3: sequencer = hatsequencer; break;
-    case 4: sequencer = basssequencer; break;
-    case 5: sequencer = fxsequencer; break;
-    case 6: sequencer = crashsequencer; break;
-    case 7: sequencer = longfxsequencer; break;
-    case 8: sequencer = voicesequencer; break;
-    case 9: sequencer = guitarsequencer; break;
+    case 1: sequencer = guitar1sequencer; break;
+    case 2: sequencer = guitar2sequencer; break;
+    case 3: sequencer = guitar3sequencer; break;
+    case 4: sequencer = guitar4sequencer; break;
     default: break;
   }
 
@@ -769,24 +438,49 @@ void myControlChange(byte channel, byte control, byte value) {
     Serial.printf("BPM: %f\n",newBPM);
     
     tempo.setBeatsPerMinute(newBPM);
-  
+  } else if (( 16 <= control) && ( control <= 23)) {
+    if (currentSelectedTrack != channel - 1) {
+      currentSelectedTrack = channel - 1;
+      Serial.printf("Current selected track: %d\n", currentSelectedTrack);
+    }
+    
+    AudioEffectEnvelope *envelope = NULL;
+    switch (currentSelectedTrack) {
+      case 0: envelope = &envelope1a; break;
+      case 1: envelope = &envelope1b; break;
+      case 2: envelope = &envelope2a; break;
+      case 3: envelope = &envelope2b; break;
+      case 4: envelope = &envelope3a; break;
+      case 5: envelope = &envelope3b; break;
+      case 6: envelope = &envelope4a; break;
+      case 7: envelope = &envelope4b; break;
+      default:
+        break;  
+    }
+
+    if (envelope != NULL) {
+      Serial.printf("control: %d\n - value: %d", control, value);
+      switch (control) {
+        case 16: envelope->delay(value ); break;
+        case 17: envelope->attack(value); break;
+        case 18: envelope->hold(value); break;
+        case 19: envelope->sustain(value); break;
+        case 20: envelope->release(value); break;
+        case 21: envelope->releaseNoteOn(value); break;
+        case 22: break;
+        case 23: break;
+        default:
+          break;  
+      } 
+    }      
+  }
+  else if (control == 7) {
+    // volume slider
   }
 }
 
 void akaiLED(byte channel, byte pattern, bool on) {
   midi1.sendNoteOn(53+pattern, (on)? 127 : 0, channel);
-}
-
-void printusage() {
-  Serial.printf("--------------\n");
-  Serial.printf("0: kick and snare (0..5)\n");
-  Serial.printf("\t\t0:off\t\t1:kick\t\t2:kick+snare\t\t3:breakbeat\t\t4:halftime\t\t5:snare only\n");
-  Serial.printf("1: hihats (0..5)\n");
-  Serial.printf("\t\t0:off\t\t1:sync\t\t2:8\t\t\t3:16\t\t\t4:4x4\t\t\t5:.xxx\n");
-  Serial.printf("2: bass (0..3)\n");
-  Serial.printf("\t\t0:off\t\t1:sync\t\t2:w/slide\t\t3:.xxx\n");
-  Serial.printf("3: effects(0..1)\n");
-  Serial.printf("\t\t0:off\t\t1:fx\n");
 }
 
 unsigned __exidx_start;
