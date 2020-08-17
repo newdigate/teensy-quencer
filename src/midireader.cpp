@@ -374,6 +374,7 @@ bool midireader::setTrackNumber(unsigned char trackNumber) {
     if (trackNumber < _numTracks){
         _midifile.seek(_track_offset[trackNumber]);
         _currentTrackOffset = 0;
+        _current_track = trackNumber;
     } else return false;
     return false;
 }
