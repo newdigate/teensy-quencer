@@ -18,7 +18,7 @@ jobs:
 
     - uses: actions/checkout@v2
       with:
-        repository: newdigate/midi-smf-reader.git
+        repository: newdigate/midi-smf-reader
         path: deps/midi-smf-reader
         fetch-depth: 1
         ref: master
