@@ -794,7 +794,12 @@ void loop() {
 
 }
 
-
+int main() {
+    setup();
+    while (true) {
+        loop();
+    }
+}
 
 
 unsigned __exidx_start;

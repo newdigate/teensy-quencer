@@ -166,6 +166,13 @@ import_arduino_library(${ARDUINO_LIB_ROOT} arm_math/src)
 
 teensy_remove_sources(${ARDUINO_LIB_ROOT}/Audio/extras)
 teensy_remove_sources(${ARDUINO_LIB_ROOT}/Audio/examples)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/teensy-variable-playback/audio)
 teensy_remove_sources(${ARDUINO_LIB_ROOT}/teensy-variable-playback/test)
 teensy_remove_sources(${ARDUINO_LIB_ROOT}/teensy-variable-playback/teensy)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/USBHost_t36/examples)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/SPI/examples)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/SerialFlash/examples)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/SerialFlash/util)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/ST7735_t3/examples)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/Wire/examples)
 
