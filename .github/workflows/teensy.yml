@@ -15,6 +15,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - uses: actions/checkout@v2
+      with:
+        repository: newdigate/midi-smf-reader.git
+        path: deps/midi-smf-reader
+        fetch-depth: 1
+        ref: master
+
     - uses: actions/checkout@v2
       with:
         repository: PaulStoffregen/cores.git
@@ -42,15 +50,6 @@ jobs:
         path: deps/SPI
         fetch-depth: 1
         ref: master
-
-    - uses: actions/checkout@v2
-      with:
-        repository: newdigate/midi-smf-reader.git
-        path: deps/midi-smf-reader
-        fetch-depth: 1
-        ref: master
-        ssh-strict: false
-        persist-credentials: false
 
     - name: download toolchain
       run: |
