@@ -14,11 +14,7 @@
 #include "songposition.h"
 #include "looptype.h"
 
-#ifdef ARDUINO
 #include <Arduino.h>
-#else
-#include "../teensy_cores_x86/mock_arduino.h"
-#endif
 
 using namespace std;
 

@@ -5,11 +5,7 @@
 #ifndef TEENSYSEQUENCER_MIDISEQUENCEADAPTER_H
 #define TEENSYSEQUENCER_MIDISEQUENCEADAPTER_H
 
-#if ARDUINO >= 100
 #include "Arduino.h"
-#else
-#endif
-
 #include "midireader.h"
 #include "sequencer.h"
 #include <cmath>

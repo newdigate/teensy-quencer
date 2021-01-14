@@ -5,4 +5,4 @@ project(common C CXX)
 set(CMAKE_CXX_STANDARD 11)
 
 add_library(common STATIC
-		sequencer.h sequencer.cpp tempo.h songposition.h midireader.h midireader.cpp midisequenceadapter.cpp midisequenceadapter.h polyphonicsampler.cpp polyphonicsampler.h)
+		sequencer.h sequencer.cpp tempo.h songposition.h midisequenceadapter.cpp midisequenceadapter.h polyphonicsampler.cpp polyphonicsampler.h)
