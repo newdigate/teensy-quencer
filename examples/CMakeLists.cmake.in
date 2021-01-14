@@ -43,8 +43,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 # Additional C and CPP files for Arduino support
 #
 
-file(GLOB TEENSY_C_FILES ${COREPATH}*.c)
-file(GLOB TEENSY_CPP_FILES ${COREPATH}*.cpp)
+file(GLOB_RECURSE TEENSY_C_FILES ${COREPATH}**.c)
+file(GLOB_RECURSE TEENSY_CPP_FILES ${COREPATH}**.cpp)
 set(TEENSY_SOURCES ${TEENSY_C_FILES} ${TEENSY_CPP_FILES})
 list(REMOVE_ITEM TEENSY_SOURCES ${COREPATH}main.cpp)
 
@@ -84,7 +84,7 @@ function(teensy_add_executable TARGET)
     message("mm ${ELFTARGET} ${ARGN} ${TEENSY_SOURCES} ${TEENSY_LIB_SOURCES}")
     add_executable(${ELFTARGET} ${ARGN} ${TEENSY_SOURCES} ${TEENSY_LIB_SOURCES})
 
-    set_target_properties(${ELFTARGET} PROPERTIES COMPILE_FLAGS "-Wall -g -O0 -mcpu=${CPU} -mthumb -nostdlib -MMD -felide-constructors -fno-exceptions -fno-rtti -std=gnu++0x")
+    set_target_properties(${ELFTARGET} PROPERTIES COMPILE_FLAGS "-Wall -g -Os -mcpu=${CPU} -mthumb -nostdlib -MMD -felide-constructors -fno-exceptions -fno-rtti -std=gnu++0x")
     set_target_properties(${ELFTARGET} PROPERTIES COMPILE_DEFINITIONS "${TEENSY_DEFINITIONS} ${INCLUDE_DIRECTORIES} -D__arm__ ")
     set_target_properties(${ELFTARGET} PROPERTIES INCLUDE_DIRECTORIES "${COREPATH}")
     set_target_properties(${ELFTARGET} PROPERTIES LINK_FLAGS "-O -Wl,--gc-sections,--defsym=__rtc_localtime=0 --specs=nano.specs -mcpu=${CPU} -mthumb -T${LINKER_FILE}")
@@ -142,8 +142,30 @@ macro(import_arduino_library_absolute LIB_DIR)
 
 endmacro(import_arduino_library_absolute)
 
+macro(teensy_remove_sources LIB_DIR)
+    file(GLOB_RECURSE FILES_TO_REMOVE ABSOLUTE "${LIB_DIR}/**.*")
+    foreach(FILE_TO_REMOVE ${FILES_TO_REMOVE})
+        list(REMOVE_ITEM TEENSY_LIB_SOURCES ${FILE_TO_REMOVE})
+        message("REMOVED ${FILE_TO_REMOVE}")
+    endforeach(FILE_TO_REMOVE ${FILES_TO_REMOVE})
+endmacro(teensy_remove_sources)
+
 set(ARDUINO_LIB_ROOT "${DEPSPATH}")
+set(INCLUDE_DIRECTORIES "${INCLUDE_DIRECTORIES}-I${ARDUINO_LIB_ROOT}/Audio/utility ")
 import_arduino_library(${ARDUINO_LIB_ROOT} SPI)
 import_arduino_library(${ARDUINO_LIB_ROOT} SdFat/src)
 import_arduino_library(${ARDUINO_LIB_ROOT} SD/src)
+import_arduino_library(${ARDUINO_LIB_ROOT} Audio)
 import_arduino_library(${ARDUINO_LIB_ROOT} midi-smf-reader/src)
+import_arduino_library(${ARDUINO_LIB_ROOT} teensy-variable-playback)
+import_arduino_library(${ARDUINO_LIB_ROOT} SerialFlash)
+import_arduino_library(${ARDUINO_LIB_ROOT} USBHost_t36)
+import_arduino_library(${ARDUINO_LIB_ROOT} ST7735_t3)
+import_arduino_library(${ARDUINO_LIB_ROOT} Wire)
+import_arduino_library(${ARDUINO_LIB_ROOT} arm_math/src)
+
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/Audio/extras)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/Audio/examples)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/teensy-variable-playback/test)
+teensy_remove_sources(${ARDUINO_LIB_ROOT}/teensy-variable-playback/teensy)
+
