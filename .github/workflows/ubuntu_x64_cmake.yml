@@ -39,6 +39,7 @@ jobs:
       - name: Make and Install Dependencies
         run: |
           cd teensy-x86-stubs && mkdir cmake-build-$BUILD_TYPE && cd cmake-build-$BUILD_TYPE && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && sudo make install
+          cat /usr/local/lib/cmake/teensy_x86_stubs/teensy_x86_stubsConfig.cmake
           cd ../..
           cd midi-smf-reader && mkdir cmake-build-$BUILD_TYPE && cd cmake-build-$BUILD_TYPE && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && sudo make install
           cat /usr/local/lib/cmake/midi_smf_reader/midi_smf_readerConfig.cmake
