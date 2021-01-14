@@ -37,21 +37,25 @@ jobs:
       with:
         repository: PaulStoffregen/Audio.git
         path: deps/Audio
+        ref: master
 
     - uses: actions/checkout@v2
       with:
         repository: PaulStoffregen/SerialFlash
         path: deps/SerialFlash
+        ref: master
 
     - uses: actions/checkout@v2
       with:
         repository: PaulStoffregen/USBHost_t36
         path: deps/USBHost_t36
+        ref: master
 
     - uses: actions/checkout@v2
       with:
         repository: PaulStoffregen/ST7735_t3
         path: deps/ST7735_t3
+        ref: master
 
     - uses: actions/checkout@v2
       with:
@@ -71,6 +75,7 @@ jobs:
       with:
         repository: PaulStoffregen/arm_math.git
         path: deps/arm_math
+        ref: master
 
     - uses: actions/checkout@v2
       with:
