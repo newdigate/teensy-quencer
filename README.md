@@ -1,5 +1,7 @@
 # teensyquencer
-![Version 1.9](https://img.shields.io/badge/warning-work_in_progress-brightgreen.svg?label=warning&colorA=555555&colorB=ff4a88)
+![wip](https://img.shields.io/badge/warning-work_in_progress-brightgreen.svg?label=warning&colorA=555555&colorB=ff4a88)
+[![teensy40](https://github.com/newdigate/teensy-quencer/workflows/teensy40/badge.svg)](https://github.com/newdigate/midi-smf-reader/actions?query=workflow%3Ateensy40)
+[![Ubuntu-x64](https://github.com/newdigate/midi-smf-reader/workflows/Ubuntu-x64/badge.svg)](https://github.com/newdigate/midi-smf-reader/actions?query=workflow%3AUbuntu-x64)
 
 Experimental multi-channel sequencer for teensy
 * each channel has a number of patterns. each pattern has its own length
