@@ -1,12 +1,9 @@
 #include <Audio.h>
 #include <SPI.h>
 #include <SD.h>
-#include <teensy_sampler.h>
+#include "playsdwavresmp.h"
 #include "sequencer.h"
-#include "songposition.h"
 #include "tempo.h"
-#include "looptype.h"
-#include "midireader.h"
 #include "midisequenceadapter.h"
 #include "polyphonicsampler.h"
 #include <USBHost_t36.h>
