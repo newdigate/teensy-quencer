@@ -791,13 +791,5 @@ void loop() {
 
 }
 
-int main() {
-    setup();
-    while (true) {
-        loop();
-    }
-}
-
-
 unsigned __exidx_start;
 unsigned __exidx_end;
