@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set(teensyquencer 1.0.0)
+set(teensyquencer_VERSION 1.0.1)
 
 set(INCLUDE_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/include/teensyquencer/)
 set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib/teensyquencer )
