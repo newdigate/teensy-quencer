@@ -1,5 +1,10 @@
 {
-    "files.associations": {
-        "set": "cpp"
-    }
+    "boost-test-adapter.logpanel": true,
+    "boost-test-adapter.testExecutable": "cmake-build-debug/test_x86/testteensyquencer",
+    "cmake.buildDirectory": "${workspaceFolder}/cmake-build-${variant:buildType}",
+    "cmake.configureSettings": {
+        "CMAKE_BUILD_TYPE": "${buildType}"        
+    },
+    "boost-test-adapter.cwd": "${workspaceFolder}",
+    "cmake.generator": "Unix Makefiles"
 }

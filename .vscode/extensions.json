@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "hbenl.vscode-test-explorer",
+        "ms-vscode.test-adapter-converter",
+        "nicnewdigate.boost-test-adapter-debug"
+    ]
+}
