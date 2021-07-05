@@ -7,15 +7,8 @@
 #include <vector>
 #include <functional>
 #include <algorithm>
-
-#if ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #include <SD.h>
-#else
-#include "../teensy_cores_x86/mock_arduino.h"
-#include "../teensy_cores_x86/SD/SD.h"
-#endif
-
 #include <string>
 
 using namespace std;
@@ -26,6 +19,9 @@ struct midimessage {
     unsigned char key;
     unsigned char velocity;
     unsigned char channel;
+    bool isTempoChange = false;
+    double tempo = 0.0;
+
 };
 
 class midireader {

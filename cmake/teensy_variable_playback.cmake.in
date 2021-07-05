@@ -1,0 +1,9 @@
+set(teensyquencer_VERSION "@teensyquencer_VERSION@")
+set(teensyquencer_LIBS teensyquencer -L@LIB_INSTALL_DIR@)
+
+@PACKAGE_INIT@
+
+set_and_check(teensyquencer_INCLUDE_DIR "@INCLUDE_INSTALL_DIR@")
+set_and_check(teensyquencer_DIR "@LIB_INSTALL_DIR@")
+
+check_required_components(teensyquencer)

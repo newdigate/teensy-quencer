@@ -1,14 +1,14 @@
 #include <Audio.h>
 #include <SPI.h>
 #include <SD.h>
-#include <teensy_sampler.h>
-#include "src/sequencer.h"
-#include "src/songposition.h"
-#include "src/tempo.h"
-#include "src/looptype.h"
-#include "src/midireader.h"
-#include "src/midisequenceadapter.h"
-#include "src/polyphonicsampler.h"
+#include <TeensyVariablePlayback.h>
+#include <sequencer.h>
+#include <songposition.h>
+#include <tempo.h>
+#include "looptype.h"
+#include "midireader.h"
+#include "midisequenceadapter.h"
+#include "polyphonicsampler.h"
 
 #include <USBHost_t36.h>
 
@@ -134,14 +134,19 @@ AudioConnection          patchCord43(mixerR, 0, tdmOUT, 14);
 AudioControlCS42448      cs42448_1;      //xy=851.7935791015625,607.3174438476562
 // GUItool: end automatically generated code
 
+void myNoteOn(byte channel, byte note, byte velocity);
+void myControlChange(byte channel, byte control, byte value);
+void myNoteOff(byte channel, byte note, byte velocity);
+
 double calcFrequency(uint8_t note) {
     double result = 440.0 * pow(2.0, (note-69) / 12.0);
     return result;
 }
 
-void guitar_note(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, AudioSynthKarplusStrong &stringVoice, AudioEffectEnvelope &envelope){
+void guitar_note(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger, AudioSynthKarplusStrong &stringVoice, AudioEffectEnvelope &envelope){
     if (isNoteOn) {
-      polyphony++;
+      if (!isretrigger) polyphony++;
+      
       double f = calcFrequency(noteNumber);
       envelope.noteOn();
       stringVoice.noteOn(f, velocity/128.0);
@@ -150,24 +155,25 @@ void guitar_note(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, AudioSynth
       envelope.noteOff();
       polyphony--;
     }
+    //Serial.printf("poly: %d\n", polyphony);
 }
 
-void guitar1_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string1a, envelope1a); }
-void guitar1_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string1b, envelope1b); }
+void guitar1_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string1a, envelope1a); }
+void guitar1_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string1b, envelope1b); }
 
-void guitar2_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string2a, envelope2a); }
-void guitar2_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string2b, envelope1b); }
+void guitar2_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string2a, envelope2a); }
+void guitar2_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string2b, envelope1b); }
 
-void guitar3_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string3a, envelope3a); }
-void guitar3_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string3a, envelope3b); }
+void guitar3_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string3a, envelope3a); }
+void guitar3_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string3a, envelope3b); }
 
-void guitar4_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4a, envelope4a); }
-void guitar4_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4b, envelope4b); }
-void guitar4_note3(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4c, envelope4c); }
-void guitar4_note4(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4d, envelope4d); }
-void guitar4_note5(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4e, envelope4e); }
-void guitar4_note6(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4f, envelope4f); }
-void guitar4_note7(uint8_t noteNumber, uint8_t velocity, bool isNoteOn) {  guitar_note(noteNumber, velocity, isNoteOn, string4g, envelope4g); }
+void guitar4_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4a, envelope4a); }
+void guitar4_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4b, envelope4b); }
+void guitar4_note3(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4c, envelope4c); }
+void guitar4_note4(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4d, envelope4d); }
+void guitar4_note5(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4e, envelope4e); }
+void guitar4_note6(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4f, envelope4f); }
+void guitar4_note7(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4g, envelope4g); }
 
 
 void sequenceGuitarEvent( sequencerevent *event, polyphonicsampler &sampler, TFTPianoDisplay &tftPianoDisplay1, TFTPianoDisplay &tftPianoDisplay2) {
@@ -175,7 +181,7 @@ void sequenceGuitarEvent( sequencerevent *event, polyphonicsampler &sampler, TFT
     sampler.noteOn(event->noteNumber, event->velocity);
     tftPianoDisplay1.keyDown(event->noteNumber);
     tftPianoDisplay2.keyDown(event->noteNumber);
-  } else {
+  } else if (event->status == 0x80) {
     sampler.noteOff(event->noteNumber);
     tftPianoDisplay1.keyUp(event->noteNumber);
     tftPianoDisplay2.keyUp(event->noteNumber);
@@ -274,15 +280,25 @@ void setup() {
   guitar3sequencer->onevent = [] (sequencerevent *event) { sequenceGuitarEvent(event, guitar3, pianoDisplay3a, pianoDisplay3b);  };
   guitar4sequencer->onevent = [] (sequencerevent *event) { sequenceGuitarEvent(event, guitar4, pianoDisplay4a, pianoDisplay4b);  };
 
+  guitar1sequencer->onloopend = [] (sequencer *sequencer, int pattern) { guitar1.turnOffAllNotesStillPlaying(); };
+  guitar2sequencer->onloopend = [] (sequencer *sequencer, int pattern) { guitar2.turnOffAllNotesStillPlaying(); };
+  guitar3sequencer->onloopend = [] (sequencer *sequencer, int pattern) { guitar3.turnOffAllNotesStillPlaying(); };
+  guitar4sequencer->onloopend = [] (sequencer *sequencer, int pattern) { guitar4.turnOffAllNotesStillPlaying(); };
+
   int pattern = 0;
   int currentChannel = 0;
 
+  sequencer *tempoSequencer = multisequencer.getTempoSequencer();
+  
+  adapter.loadMidi("innuendo.mid");
+  adapter.loadMidiTempoTrack(0, 42, 4); // track 0, 42 * 4 beats, offset by 4 bars
+  
   // guitar 1 sequencer
   pattern = guitar1sequencer->addPattern(4); // no beat
 
   pattern++;
   adapter.loadMidi("innuendo.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 1, 35, 0);  // multicequencer channel number, midi track number, 35 bars long
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 1, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar1sequencer->setNextPattern(pattern);
   
   // guitar 2 sequencer
@@ -290,7 +306,7 @@ void setup() {
   pattern = guitar2sequencer->addPattern(4); // no beat 4 bars
   
   pattern++;
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 2, 35, 0);  // multicequencer channel number, midi track number, 35 bars long
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 2, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar2sequencer->setNextPattern(pattern);
   
   // guitar 3 sequencer
@@ -298,7 +314,7 @@ void setup() {
   pattern = guitar3sequencer->addPattern(4); // no hats
 
   pattern++;
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 3, 35, 0);  // multicequencer channel number, midi track number, 35 bars long
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 3, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar3sequencer->setNextPattern(pattern);
 
   // guitar 4 sequencer
@@ -306,7 +322,7 @@ void setup() {
   pattern = guitar4sequencer->addPattern(4); // no bass
 
   pattern++;
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 4, 35, 0);
+  adapter.loadMidifileToNextChannelPattern(currentChannel, 4, 42, 0);
   adapter.close();
   guitar4sequencer->setNextPattern(pattern);
 
@@ -327,8 +343,16 @@ void setup() {
   envelope4f.delay(0);
   envelope4g.delay(0);
 
+  mixer4a.gain(0, 1.0 / 2.0);
+  mixer4a.gain(1, 1.0 / 2.0);
+  mixer4a.gain(2, 1.0 / 2.0);
+  mixer4a.gain(3, 1.0 / 2.0);
+
+  mixer4b.gain(0, 1.0 / 2.0);
+  mixer4b.gain(1, 1.0 / 2.0);
+  mixer4b.gain(2, 1.0 / 2.0);
+
   tft.fillScreen(ST7735_BLACK);
-  tft.println("multisequencer start..."); 
   multisequencer.start(micros());
   AudioInterrupts();     
 }

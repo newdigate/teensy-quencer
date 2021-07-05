@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(common C CXX)
+project(teensyquencer C CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(SOURCE_FILES
+		midireader.cpp midisequenceadapter.cpp polyphonicsampler.cpp)
 
-add_library(common STATIC
-		sequencer.h sequencer.cpp tempo.h songposition.h midireader.h midireader.cpp midisequenceadapter.cpp midisequenceadapter.h polyphonicsampler.cpp polyphonicsampler.h)
+set(HEADER_FILES
+		sequencer.h sequencer.cpp tempo.h songposition.h midireader.h midisequenceadapter.h polyphonicsampler.h)
+
+if (DEFINED BUILD_FOR_LINUX)    
+	include(CMakeLists.linux.cmake)
+else()
+	include(CMakeLists.teensy.cmake)
+endif()

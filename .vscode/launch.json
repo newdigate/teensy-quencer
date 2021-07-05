@@ -8,7 +8,7 @@
             "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/cmake-build-debug/test_x86/testteensyquencer",
+            "program": "${workspaceFolder}/cmake-build-debug/test_x86/tests",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

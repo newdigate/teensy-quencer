@@ -14,26 +14,28 @@
 #include "songposition.h"
 #include "looptype.h"
 
-#ifdef ARDUINO
 #include <Arduino.h>
-#else
-#include "../teensy_cores_x86/mock_arduino.h"
-#endif
 
 using namespace std;
 
 struct sequencerevent {
     uint8_t channel = 0;
     uint8_t noteNumber = 0;
-    unsigned char velocity;
+    unsigned char velocity = 0;
     long position = 0;
     bool isNoteStartEvent = true;
+    unsigned char status  = 0;
 
     bool operator ()(sequencerevent *lhs, const sequencerevent *rhs) const
     {
         return lhs->position < rhs->position;
     }
 };
+
+struct sequencertempoevent : sequencerevent {
+    double tempo = 0.0;
+};
+
 
 class sequencer {
 public:
@@ -81,6 +83,7 @@ public:
             }
 
             if (wrapped) {
+                if (onloopend) onloopend(this, _currentPattern);
                 _last_event_index = 0;
                 if (_currentPattern != _nextPattern) {
                     _currentPattern = _nextPattern;
@@ -103,6 +106,7 @@ public:
 
     std::function<void(sequencerevent *event)> onevent;
     std::function<void(sequencer *sequencer, int newPattern)> onloopchange;
+    std::function<void(sequencer *sequencer, int pattern)> onloopend;
 
     void writenoteslist(unsigned pattern) {
         if (pattern >= _numPatterns) return;
@@ -196,7 +200,13 @@ class multisequencer {
 public:
 
     multisequencer(tempo &tempo) : _tempo(tempo) {
-
+        _songposition = new songposition();
+        _tempoSequencer = new sequencer(tempo, _songposition);
+        _tempoSequencer->onevent = [&] (sequencerevent *event) {
+            sequencertempoevent *evt = (sequencertempoevent*)event;
+            Serial.printf("tempo: %.2f\n", evt->tempo);
+            tempo.setBeatsPerMinute(evt->tempo);
+        };
     }
 
     sequencer* newSequencer() {
@@ -215,6 +225,10 @@ public:
         return _sequencers[index];
     }
 
+    sequencer* getTempoSequencer() {
+        return _tempoSequencer;
+    }
+
     long indexOf(sequencer *sequencer) {
         auto itr = std::find(_sequencers.begin(), _sequencers.end(), sequencer);
         if (itr != _sequencers.cend()) {
@@ -226,6 +240,7 @@ public:
     }
 
     void start(unsigned millis) {
+        _tempoSequencer->start(millis);
         for (auto it = _sequencers.begin(); it != _sequencers.end(); it++) {
             sequencer *s = *it;
             s->start(millis);
@@ -233,6 +248,7 @@ public:
     }
 
     void tick(unsigned millis) {
+        _tempoSequencer->tick(millis);
         for (auto it = _sequencers.begin(); it != _sequencers.end(); it++) {
             sequencer *s = *it;
             s->tick(millis);
@@ -244,6 +260,8 @@ private:
     tempo &_tempo;
     unsigned _numSequencers = 0;
     vector<sequencer*> _sequencers;
+    sequencer *_tempoSequencer;
+    songposition *_songposition;
 
 };
 #endif //TEENSYSEQUENCER_SEQUENCER_H
