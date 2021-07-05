@@ -4,7 +4,7 @@ set(CMAKE_EXE_LINKER_FLAGS "--specs=nano.specs" CACHE INTERNAL "")
 #teensy compiler options
 set(COMPILERPATH "/opt/gcc-arm-none-eabi-9-2019-q4-major/bin/")
 #set(COMPILERPATH "/Applications/ARM/bin/")
-set(DEPSPATH "/home/runner/work/teensy-variable-playback/teensy-variable-playback/deps")
+set(DEPSPATH "/home/runner/work/teensy-quencer/teensy-quencer/deps")
 #set(DEPSPATH "/Users/nicholasnewdigate/Development/github/newdigate/temp_dep")
 set(COREPATH "${DEPSPATH}/cores/teensy4/")
 
