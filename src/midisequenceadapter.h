@@ -5,7 +5,7 @@
 #ifndef TEENSYSEQUENCER_MIDISEQUENCEADAPTER_H
 #define TEENSYSEQUENCER_MIDISEQUENCEADAPTER_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 #include "midireader.h"
 #include "sequencer.h"
 #include <cmath>

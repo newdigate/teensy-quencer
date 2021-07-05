@@ -34,4 +34,3 @@ else()
     add_subdirectory(src)
     add_subdirectory(test)
 endif()
-

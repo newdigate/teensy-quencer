@@ -2,7 +2,7 @@
 #include <SD.h>
 #include <dirent.h>
 #include "../src/sequencer.h"
-#include "../src/midireader.h"
+#include "midireader.h"
 #include "../src/midisequenceadapter.h"
 #include "../src/polyphonicsampler.h"
 #include <cstdio>
