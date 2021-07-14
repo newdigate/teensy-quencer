@@ -19,6 +19,7 @@ if (NOT DEFINED BUILD_FOR_LINUX)
     import_arduino_library(tftpianoview ${DEPSPATH}/arduino-tftpianoview/src)
     import_arduino_library(TeensyVariablePlayback ${DEPSPATH}/teensy-variable-playback src)
     import_arduino_library(USBHost_t36 ${DEPSPATH}/USBHost_t36)
+    import_arduino_library(midismfreader ${DEPSPATH}/midi-smf-reader/src)
     
     add_subdirectory(src)
     add_subdirectory(examples/demo)
