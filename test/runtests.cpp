@@ -1,10 +1,10 @@
     #include <iostream>
 #include <SD.h>
 #include <dirent.h>
-#include "../src/sequencer.h"
+#include "sequencer.h"
 #include "midireader.h"
-#include "../src/midisequenceadapter.h"
-#include "../src/polyphonicsampler.h"
+#include "midisequenceadapter.h"
+#include "polyphonicsampler.h"
 #include <cstdio>
 #include <pwd.h>
 #include <unistd.h>

@@ -10,7 +10,10 @@ include_directories(${teensy_x86_stubs_INCLUDE_DIR})
 find_package(teensy_x86_sd_stubs)
 include_directories(${teensy_x86_sd_stubs_INCLUDE_DIR})
 
-add_library(teensyquencer STATIC ${HEADER_FILES} ${SOURCE_FILES})
+find_package(midi_smf_reader)
+include_directories(${midi_smf_reader_INCLUDE_DIR})
+
+add_library(teensyquencer STATIC ${SOURCE_FILES})
 
 set_target_properties(teensyquencer PROPERTIES PUBLIC_HEADER ${HEADER_FILES})
 
