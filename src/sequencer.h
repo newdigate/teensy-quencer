@@ -4,17 +4,18 @@
 
 #ifndef TEENSYSEQUENCER_SEQUENCER_H
 #define TEENSYSEQUENCER_SEQUENCER_H
+#include <Arduino.h>
+#include "tempo.h"
+#include "songposition.h"
+#include "looptype.h"
 
 #include <set>
 #include <vector>
 #include <functional>
 #include <algorithm>
 
-#include "tempo.h"
-#include "songposition.h"
-#include "looptype.h"
 
-#include <Arduino.h>
+
 
 using namespace std;
 

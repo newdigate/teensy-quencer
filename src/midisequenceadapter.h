@@ -23,7 +23,7 @@ public:
         _midifileReader.close();
     }
 
-    int loadMidifile(unsigned toSequencerChannel, unsigned midiFileTrackNumber, unsigned numBars, int transpose=0) {
+    int loadMidifileToChannelNumber(unsigned toSequencerChannel, unsigned midiFileTrackNumber, unsigned numBars, int transpose=0) {
         sequencer *seq = _multisequencer.getSequencer(toSequencerChannel);
         if (seq)
             return loadMidifileToNextPattern(seq, numBars, transpose);
