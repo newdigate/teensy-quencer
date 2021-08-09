@@ -1,7 +1,7 @@
 #include <Audio.h>
 #include <SPI.h>
 #include <SD.h>
-#include "playsdwavresmp.h"
+#include <TeensyVariablePlayback.h>
 #include "sequencer.h"
 #include "tempo.h"
 #include "midisequenceadapter.h"
@@ -27,12 +27,12 @@ midisequenceadapter adapter(multisequencer);
 AudioPlaySdWav           playSdRaw7;     //xy=782.1388702392578,236.66666269302368
 AudioPlaySdWav           playSdRaw8;     //xy=783.6944465637207,431.25000381469727
 
-AudioPlaySdWavResmp           playSdRaw6;     //xy=411.50000762939453,473.25000953674316
-AudioPlaySdWavResmp           playSdRaw3;     //xy=421.00000762939453,319.5000047683716
-AudioPlaySdWavResmp           playSdRaw2;     //xy=429.25000762939453,240.50000381469727
-AudioPlaySdWavResmp           playSdRaw4;     //xy=431.00000762939453,363.2500057220459
-AudioPlaySdWavResmp           playSdRaw5;     //xy=432.00000762939453,423.5000057220459
-AudioPlaySdWavResmp           playSdRaw1;     //xy=435.25000762939453,169.25000095367432
+AudioPlaySdResmp           playSdRaw6;     //xy=411.50000762939453,473.25000953674316
+AudioPlaySdResmp           playSdRaw3;     //xy=421.00000762939453,319.5000047683716
+AudioPlaySdResmp           playSdRaw2;     //xy=429.25000762939453,240.50000381469727
+AudioPlaySdResmp           playSdRaw4;     //xy=431.00000762939453,363.2500057220459
+AudioPlaySdResmp           playSdRaw5;     //xy=432.00000762939453,423.5000057220459
+AudioPlaySdResmp           playSdRaw1;     //xy=435.25000762939453,169.25000095367432
 
 // GUItool: begin automatically generated code
 AudioSynthNoiseWhite     noise1;         //xy=55,306
@@ -192,19 +192,19 @@ char *longfxnames[2] = {"LONGFX01.wav", "LONGFX02.wav"};
 char *fxnames[18] = {"FX01.wav", "FX02.wav", "FX03.wav", "FX04.wav", "FX05.wav", "FX06.wav", "FX07.wav", "FX09.wav","FX10.wav", "FX21.wav", "FX28.wav","FX30.wav","FX34.wav","FX35.wav","FX40.wav","FX77.wav", "HIT1.wav", "HIT2.wav"};
 char *bassslidenames[11] = {"BASSSL01.wav", "BASSSL02.wav","BASSSL03.wav","BASSSL04.wav", "BASSSL05.wav", "BASSSL06.wav","BASSSL07.wav","BASSSL08.wav","BASSSL09.wav","BASSSL10.wav","BASSSL11.wav"};
 
-void playSample(AudioPlaySdWavResmp &audio, char *s, double rate) {
+void playSample(AudioPlaySdResmp &audio, char *s, double rate) {
     if (audio.isPlaying())
         audio.stop();
     audio.setPlaybackRate(rate);
-    audio.play(s);
+    audio.playWav(s);
 }
 
-void stopSample(AudioPlaySdWavResmp &audio) {
+void stopSample(AudioPlaySdResmp &audio) {
     if (audio.isPlaying())
         audio.stop();
 }
 
-void triggerAudioEvent(sequencerevent *event, AudioPlaySdWavResmp &audio, char *filename, AudioMixer4 &mixer, unsigned char mixerChannel) {
+void triggerAudioEvent(sequencerevent *event, AudioPlaySdResmp &audio, char *filename, AudioMixer4 &mixer, unsigned char mixerChannel) {
     if (event->isNoteStartEvent) {
         double rate = calcPitchFactor(event->noteNumber);
         mixer.gain(mixerChannel, event->velocity/128.0);
@@ -591,7 +591,6 @@ void setup() {
     };
 
     int pattern = 0;
-    int currentChannel = 0;
 
     tft.println("beatsequencer...");
     // beatsequencer
@@ -599,75 +598,75 @@ void setup() {
 
     pattern++;
     adapter.loadMidi("kik.mid");
-    adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 1);  // multicequencer channel number, midi track number, 8 bars long
+    adapter.loadMidifileToNextPattern(beatsequencer, 0, 128, 1);  // multicequencer channel number, midi track number, 8 bars long
     adapter.close();
     beatsequencer->setNextPattern(pattern);
 
     tft.println("snaresequencer...");
     // snaresequencer
-    currentChannel++;
+    
     pattern = snaresequencer->addPattern(4); // no beat 4 bars
 
     pattern++;
     adapter.loadMidi("snare.mid");
-    adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
+    adapter.loadMidifileToNextPattern(snaresequencer, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
     adapter.close();
 
     tft.println("hatssequencer..");
     // hatsequencer
-    currentChannel++;
+    
     pattern = hatsequencer->addPattern(4); // no hats
 
     pattern++;
     adapter.loadMidi("hihat.mid");
-    adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
+    adapter.loadMidifileToNextPattern(hatsequencer, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
     adapter.close();
     hatsequencer->setNextPattern(pattern);
 
     tft.println("basssequencer..");
     // basssequencer
-    currentChannel++;
+    
     pattern = basssequencer->addPattern(4); // no bass
 
     pattern++;
     adapter.loadMidi("dredbass.mid");
-    adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 0);
+    adapter.loadMidifileToNextPattern(basssequencer, 0, 128, 0);
     adapter.close();
     basssequencer->setNextPattern(pattern);
 
     tft.println("fxsequencer..");
     //fxsequencer
-    currentChannel++;
+    
     pattern = fxsequencer->addPattern(4); // no fx
 
     tft.println("crashsequencer..");
     //crashsequencer
-    currentChannel++;
+    
     pattern = crashsequencer->addPattern(8); // no crash
 
     //longfxsequencer
-    currentChannel++;
+    
     pattern = longfxsequencer->addPattern(8); // no long fx
 
     tft.println("voicesequencer..");
     //voicesequencer
-    currentChannel++;
+    
     pattern = voicesequencer->addPattern(4); // no long fx
 
     pattern++;
     adapter.loadMidi("guitar.mid");
-    adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 0);
+    adapter.loadMidifileToNextPattern(voicesequencer, 0, 128, 0);
     adapter.close();
     voicesequencer->setNextPattern(pattern);
 
     tft.println("guitar-sequencer...t1");
     //guitar-esequencer
-    currentChannel++;
+    
     pattern = guitarsequencer->addPattern(4); // no long fx
 
     pattern++;
     adapter.loadMidi("guitar2.mid");
-    adapter.loadMidifileToNextChannelPattern(currentChannel, 0, 128, 0);
+    adapter.loadMidifileToNextPattern(guitarsequencer, 0, 128, 0);
     adapter.close();
     guitarsequencer->setNextPattern(pattern);
 

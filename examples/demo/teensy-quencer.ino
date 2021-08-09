@@ -1,10 +1,11 @@
+#include <Arduino.h>
 #include <Audio.h>
 #include <SPI.h>
 #include <SD.h>
 #include <TeensyVariablePlayback.h>
-#include <sequencer.h>
-#include <songposition.h>
-#include <tempo.h>
+#include "sequencer.h"
+#include "songposition.h"
+#include "tempo.h"
 #include "looptype.h"
 #include "midireader.h"
 #include "midisequenceadapter.h"
@@ -291,14 +292,14 @@ void setup() {
   sequencer *tempoSequencer = multisequencer.getTempoSequencer();
   
   adapter.loadMidi("innuendo.mid");
-  adapter.loadMidiTempoTrack(0, 42, 4); // track 0, 42 * 4 beats, offset by 4 bars
+  adapter.loadMidiTempoTrack(0, 0, 42, 4); // track 0, 42 * 4 beats, offset by 4 bars
   
   // guitar 1 sequencer
   pattern = guitar1sequencer->addPattern(4); // no beat
 
   pattern++;
   adapter.loadMidi("innuendo.mid");
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 1, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
+  adapter.loadMidifile(guitar1sequencer, 1, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar1sequencer->setNextPattern(pattern);
   
   // guitar 2 sequencer
@@ -306,7 +307,7 @@ void setup() {
   pattern = guitar2sequencer->addPattern(4); // no beat 4 bars
   
   pattern++;
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 2, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
+  adapter.loadMidifileToNextPattern(guitar2sequencer, 2, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar2sequencer->setNextPattern(pattern);
   
   // guitar 3 sequencer
@@ -314,7 +315,7 @@ void setup() {
   pattern = guitar3sequencer->addPattern(4); // no hats
 
   pattern++;
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 3, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
+  adapter.loadMidifileToNextPattern(guitar3sequencer, 3, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar3sequencer->setNextPattern(pattern);
 
   // guitar 4 sequencer
@@ -322,7 +323,7 @@ void setup() {
   pattern = guitar4sequencer->addPattern(4); // no bass
 
   pattern++;
-  adapter.loadMidifileToNextChannelPattern(currentChannel, 4, 42, 0);
+  adapter.loadMidifileToNextPattern(guitar4sequencer, 4, 42, 0);
   adapter.close();
   guitar4sequencer->setNextPattern(pattern);
 

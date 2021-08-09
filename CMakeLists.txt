@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(teensysequencer)
+set(CMAKE_CXX_STANDARD 14)
 
 if (NOT DEFINED TEENSY_VERSION)
     set(BUILD_FOR_LINUX 1)
@@ -22,9 +23,9 @@ if (NOT DEFINED BUILD_FOR_LINUX)
     import_arduino_library(midismfreader ${DEPSPATH}/midi-smf-reader/src)
     
     add_subdirectory(src)
+    add_subdirectory(examples/basic)
     add_subdirectory(examples/demo)
 else()
-    set(CMAKE_C_STANDARD 14)
     set(CMAKE_CXX_STANDARD 14)
     find_package(teensy_x86_stubs)
     include_directories(${teensy_x86_stubs_INCLUDE_DIR})
