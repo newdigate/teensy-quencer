@@ -123,7 +123,6 @@ public:
         }
     }
 
-
     unsigned int addPattern(unsigned numBars) {
         auto *sortedEventsForPattern = new vector<sequencerevent*>();
         _sorted_events.push_back(sortedEventsForPattern);
@@ -139,6 +138,7 @@ public:
         _nextPattern = nextPattern;
     }
 
+    // this method needs to be called if notes are not added in order
     void sortEvents(unsigned pattern) {
         vector<sequencerevent*> *sortedEventsForPatternPtr = _sorted_events[pattern];
 
@@ -152,7 +152,10 @@ public:
     }
 
     void addelement(unsigned pattern, unsigned startTick, unsigned length, uint8_t channel, uint8_t noteNumber) {
-        if (pattern >= _numPatterns) return;
+        if (pattern >= _numPatterns) { 
+            Serial.printf("sequencer.addelement() : pattern %d is greater than _numPatterns %d\n", pattern, _numPatterns);
+            return;
+        }
 
         vector<sequencerevent*> *sortedEventsForPatternPtr = _sorted_events[pattern];
 
@@ -172,10 +175,12 @@ public:
     }
 
     void addevent(unsigned pattern, sequencerevent *event) {
-        if (pattern >= _numPatterns) return;
+        if (pattern >= _numPatterns) { 
+            Serial.printf("sequencer.addevent() : pattern %d is greater than _numPatterns %d\n", pattern, _numPatterns);
+            return;
+        }
         vector<sequencerevent*> *pendingEventsForPatternPtr = _sorted_events[pattern];
         pendingEventsForPatternPtr->push_back( event );
-
     }
 
 private:
