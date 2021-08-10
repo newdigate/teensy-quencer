@@ -3,13 +3,13 @@
 #include <SPI.h>
 #include <SD.h>
 #include <TeensyVariablePlayback.h>
+#include <TeensyPolyphony.h>
 #include "sequencer.h"
 #include "songposition.h"
 #include "tempo.h"
 #include "looptype.h"
 #include "midireader.h"
 #include "midisequenceadapter.h"
-#include "polyphonicsampler.h"
 
 #include <USBHost_t36.h>
 
@@ -32,10 +32,6 @@ sequencer *guitar2sequencer;
 sequencer *guitar3sequencer;
 sequencer *guitar4sequencer;
 
-polyphonicsampler guitar1;
-polyphonicsampler guitar2;
-polyphonicsampler guitar3;
-polyphonicsampler guitar4;
 
 uint8_t polyphony = 0;
 uint8_t currentSelectedTrack = 0;
@@ -53,6 +49,7 @@ TFTPianoDisplay pianoDisplay3b(tft, 3, 6, 0, 80); //tft, byte octaves, byte star
 TFTPianoDisplay pianoDisplay4a(tft, 3, 3, 0, 94); //tft, byte octaves, byte startOctave, byte x, byte y
 TFTPianoDisplay pianoDisplay4b(tft, 3, 6, 0, 110); //tft, byte octaves, byte startOctave, byte x, byte y
 
+#pragma region audio graph
 // GUItool: begin automatically generated code
 AudioSynthKarplusStrong  string4f;       //xy=210,575
 AudioSynthKarplusStrong  string1b;        //xy=213,87
@@ -134,6 +131,12 @@ AudioConnection          patchCord42(mixerR, 0, tdmOUT, 10);
 AudioConnection          patchCord43(mixerR, 0, tdmOUT, 14);
 AudioControlCS42448      cs42448_1;      //xy=851.7935791015625,607.3174438476562
 // GUItool: end automatically generated code
+#pragma endregion audio graph
+
+stringsampler guitar1;
+stringsampler guitar2;
+stringsampler guitar3;
+stringsampler guitar4;
 
 void myNoteOn(byte channel, byte note, byte velocity);
 void myControlChange(byte channel, byte control, byte value);
@@ -144,46 +147,13 @@ double calcFrequency(uint8_t note) {
     return result;
 }
 
-void guitar_note(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger, AudioSynthKarplusStrong &stringVoice, AudioEffectEnvelope &envelope){
-    if (isNoteOn) {
-      if (!isretrigger) polyphony++;
-      
-      double f = calcFrequency(noteNumber);
-      envelope.noteOn();
-      stringVoice.noteOn(f, velocity/128.0);
-    } else {
-      stringVoice.noteOff(0);
-      envelope.noteOff();
-      polyphony--;
-    }
-    //Serial.printf("poly: %d\n", polyphony);
-}
-
-void guitar1_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string1a, envelope1a); }
-void guitar1_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string1b, envelope1b); }
-
-void guitar2_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string2a, envelope2a); }
-void guitar2_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string2b, envelope1b); }
-
-void guitar3_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string3a, envelope3a); }
-void guitar3_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string3a, envelope3b); }
-
-void guitar4_note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4a, envelope4a); }
-void guitar4_note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4b, envelope4b); }
-void guitar4_note3(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4c, envelope4c); }
-void guitar4_note4(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4d, envelope4d); }
-void guitar4_note5(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4e, envelope4e); }
-void guitar4_note6(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4f, envelope4f); }
-void guitar4_note7(uint8_t noteNumber, uint8_t velocity, bool isNoteOn, bool isretrigger) {  guitar_note(noteNumber, velocity, isNoteOn, isretrigger, string4g, envelope4g); }
-
-
-void sequenceGuitarEvent( sequencerevent *event, polyphonicsampler &sampler, TFTPianoDisplay &tftPianoDisplay1, TFTPianoDisplay &tftPianoDisplay2) {
+void sequenceGuitarEvent( sequencerevent *event, stringsampler &sampler, TFTPianoDisplay &tftPianoDisplay1, TFTPianoDisplay &tftPianoDisplay2) {
   if (event->isNoteStartEvent) {
-    sampler.noteOn(event->noteNumber, event->velocity);
+    sampler.noteEvent(event->noteNumber, event->velocity, true, false);
     tftPianoDisplay1.keyDown(event->noteNumber);
     tftPianoDisplay2.keyDown(event->noteNumber);
   } else if (event->status == 0x80) {
-    sampler.noteOff(event->noteNumber);
+    sampler.noteEvent(event->noteNumber, event->velocity, false, false);
     tftPianoDisplay1.keyUp(event->noteNumber);
     tftPianoDisplay2.keyUp(event->noteNumber);
   }
@@ -252,22 +222,19 @@ void setup() {
 
   tft.fillScreen(ST7735_BLACK);
   
-  guitar1.pushNoteFunction( guitar1_note1 );
-  guitar1.pushNoteFunction( guitar1_note2 );
-  
-  guitar2.pushNoteFunction( guitar2_note1 );
-  guitar2.pushNoteFunction( guitar2_note2 );
-
-  guitar3.pushNoteFunction( guitar3_note1 );
-  guitar3.pushNoteFunction( guitar3_note2 );
-
-  guitar4.pushNoteFunction( guitar4_note1 );
-  guitar4.pushNoteFunction( guitar4_note2 );
-  guitar4.pushNoteFunction( guitar4_note3 );
-  guitar4.pushNoteFunction( guitar4_note4 );
-  guitar4.pushNoteFunction( guitar4_note5 );
-  guitar4.pushNoteFunction( guitar4_note6 );
-  guitar4.pushNoteFunction( guitar4_note7 );
+  guitar1.addVoice( string1a, envelope1a );
+  guitar1.addVoice( string1b, envelope1b );
+  guitar2.addVoice( string2a, envelope2a );
+  guitar2.addVoice( string2b, envelope2b );
+  guitar3.addVoice( string3a, envelope3a );
+  guitar3.addVoice( string3b, envelope3b );
+  guitar4.addVoice( string4a, envelope4a );
+  guitar4.addVoice( string4b, envelope4b );
+  guitar4.addVoice( string4c, envelope4c );
+  guitar4.addVoice( string4d, envelope4d );
+  guitar4.addVoice( string4e, envelope4e );
+  guitar4.addVoice( string4f, envelope4f );
+  guitar4.addVoice( string4g, envelope4g );
 
   tft.println("sequencer..."); 
   

@@ -3,10 +3,10 @@ cmake_minimum_required(VERSION 3.5)
 project(teensyquencer C CXX)
 
 set(SOURCE_FILES
-		midisequenceadapter.cpp polyphonicsampler.cpp sequencer.cpp)
+		midisequenceadapter.cpp sequencer.cpp)
 
 set(HEADER_FILES
-		sequencer.h tempo.h songposition.h midisequenceadapter.h polyphonicsampler.h)
+		Teensyquencer.h sequencer.h tempo.h songposition.h midisequenceadapter.h)
 
 if (NOT DEFINED TEENSY_VERSION)    
 	include(CMakeLists.linux.cmake)

@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(examples)
-set(CMAKE_CXX_STANDARD 11)
+
+import_arduino_library(teensypolyphony ${DEPSPATH}/teensy-polyphony/src)
+
 add_subdirectory(basic)
+add_subdirectory(demo)

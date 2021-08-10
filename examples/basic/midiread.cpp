@@ -2,10 +2,10 @@
 #include <SPI.h>
 #include <SD.h>
 #include <TeensyVariablePlayback.h>
+#include <TeensyPolyphony.h>
 #include "sequencer.h"
 #include "tempo.h"
 #include "midisequenceadapter.h"
-#include "polyphonicsampler.h"
 #include <USBHost_t36.h>
 
 ///#include <Adafruit_GFX.h>    // Core graphics library
@@ -311,61 +311,8 @@ void printusage() {
     Serial.printf("\t\t0:off\t\t1:fx\n");
 }
 
-
-
-polyphonicsampler guitar;
+stringsampler guitar;
 uint8_t polyphony = 0;
-
-void note1(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-        polyphony++;
-        double f = calcFrequency(noteNumber);
-        string2.noteOn(f, velocity/128.0);
-    } else {
-        string2.noteOff(0);
-        polyphony--;
-    }
-}
-void note2(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-        polyphony++;
-        double f = calcFrequency(noteNumber);
-        string3.noteOn(f, velocity/128.0);
-    } else {
-        string3.noteOff(0);
-        polyphony--;
-    }
-}
-void note3(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-        polyphony++;
-        double f = calcFrequency(noteNumber);
-        string4.noteOn(f, velocity/128.0);
-    } else {
-        string4.noteOff(0);
-        polyphony--;
-    }
-}
-void note4(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-        polyphony++;
-        double f = calcFrequency(noteNumber);
-        string5.noteOn(f, velocity/128.0);
-    } else {
-        string5.noteOff(0);
-        polyphony--;
-    }
-}
-void note5(uint8_t noteNumber, uint8_t velocity, bool isNoteOn){
-    if (isNoteOn) {
-        polyphony++;
-        double f = calcFrequency(noteNumber);
-        string6.noteOn(f, velocity/128.0);
-    } else {
-        string6.noteOff(0);
-        polyphony--;
-    }
-}
 
 void setup() {
     AudioNoInterrupts();  // disable audio library momentarily
@@ -433,12 +380,12 @@ void setup() {
     tft.fillScreen(ST7735_BLACK);
     //tft.println("guitar...");
 
-    guitar.pushNoteFunction( note1 );
-    guitar.pushNoteFunction( note2 );
-    guitar.pushNoteFunction( note3 );
-    guitar.pushNoteFunction( note4 );
-    guitar.pushNoteFunction( note5 );
-
+    guitar.addVoice( string1 );
+    guitar.addVoice( string2 );
+    guitar.addVoice( string3 );
+    guitar.addVoice( string4 );
+    guitar.addVoice( string5 );
+    guitar.addVoice( string6 );
     tft.println("sequencer...");
 
     beatsequencer = multisequencer.newSequencer();
@@ -579,12 +526,8 @@ void setup() {
     guitarsequencer->onevent = [] (sequencerevent *event) {
         //Serial.printf("Guitar: %d, on/off:%d ch:%d\n", event->noteNumber, event->isNoteStartEvent, event->channel);
         switch(event->channel) {
-            case 0:
-                if (event->isNoteStartEvent) {
-                    guitar.noteOn(event->noteNumber, event->velocity / 2.0);
-                } else {
-                    guitar.noteOff(event->noteNumber);
-                }
+            case 0: 
+                guitar.noteEvent(event->noteNumber, event->velocity / 2.0, event->isNoteStartEvent, false);
                 break;
             default: break;
         }

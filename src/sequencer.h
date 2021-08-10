@@ -40,7 +40,7 @@ struct sequencertempoevent : sequencerevent {
 
 class sequencer {
 public:
-    sequencer(tempo &tempo, songposition *position) : _tempo(tempo), _position(position) {}
+    sequencer(tempo &tempo, songposition *position) : _sorted_events(0), _tempo(tempo), _position(position) {}
 
     void tick(unsigned long micros) {
         if (!_playing) return;
@@ -197,7 +197,7 @@ private:
     unsigned long _microseconds = 0;
     unsigned long _previousMicroseconds = 0;
     vector<unsigned int> _loop_duration_bars;
-    vector< vector<sequencerevent*> * > _sorted_events;
+    vector< vector<sequencerevent*> * > _sorted_events; //store a collection of pointers to sequencerevents per pattern
 
     int _last_event_index = 0;
 };
