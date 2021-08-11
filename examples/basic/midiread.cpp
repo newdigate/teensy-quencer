@@ -23,18 +23,17 @@ tempo tempo(100.0f);
 multisequencer multisequencer(tempo);
 midisequenceadapter adapter(multisequencer);
 
+#pragma region audio graph
+
 // GUItool: begin automatically generated code
 AudioPlaySdWav           playSdRaw7;     //xy=782.1388702392578,236.66666269302368
 AudioPlaySdWav           playSdRaw8;     //xy=783.6944465637207,431.25000381469727
-
-AudioPlaySdResmp           playSdRaw6;     //xy=411.50000762939453,473.25000953674316
-AudioPlaySdResmp           playSdRaw3;     //xy=421.00000762939453,319.5000047683716
-AudioPlaySdResmp           playSdRaw2;     //xy=429.25000762939453,240.50000381469727
+AudioPlaySdWav           playSdRaw6;     //xy=411.50000762939453,473.25000953674316
+AudioPlaySdWav           playSdRaw3;     //xy=421.00000762939453,319.5000047683716
+AudioPlaySdWav           playSdRaw2;     //xy=429.25000762939453,240.50000381469727
 AudioPlaySdResmp           playSdRaw4;     //xy=431.00000762939453,363.2500057220459
 AudioPlaySdResmp           playSdRaw5;     //xy=432.00000762939453,423.5000057220459
-AudioPlaySdResmp           playSdRaw1;     //xy=435.25000762939453,169.25000095367432
-
-// GUItool: begin automatically generated code
+AudioPlaySdWav           playSdRaw1;     //xy=435.25000762939453,169.25000095367432
 AudioSynthNoiseWhite     noise1;         //xy=55,306
 AudioSynthKarplusStrong  string1;        //xy=85.88887023925781,516.4088134765625
 AudioFilterStateVariable filter1;        //xy=189,308
@@ -159,6 +158,17 @@ AudioConnection          patchCord76(mixer5, 0, tdm3, 2);
 AudioConnection          patchCord77(mixer12, 0, tdm3, 14);
 AudioControlCS42448      cs42448_1;      //xy=961.7936096191406,698.3174142837524
 // GUItool: end automatically generated code
+#pragma endregion
+
+stringsampler guitar;
+unpitchedsdwavsampler beatsampler;
+unpitchedsdwavsampler snaresampler;
+unpitchedsdwavsampler hatssampler;
+sdwavsampler basssampler;
+unpitchedsdwavsampler fxsampler;
+stringsampler voicesampler;
+unpitchedsdwavsampler crashsampler;
+unpitchedsdwavsampler longfxsampler;
 
 sequencer *beatsequencer;
 sequencer *snaresequencer;
@@ -311,7 +321,7 @@ void printusage() {
     Serial.printf("\t\t0:off\t\t1:fx\n");
 }
 
-stringsampler guitar;
+
 uint8_t polyphony = 0;
 
 void setup() {
@@ -380,13 +390,38 @@ void setup() {
     tft.fillScreen(ST7735_BLACK);
     //tft.println("guitar...");
 
-    guitar.addVoice( string1 );
     guitar.addVoice( string2 );
     guitar.addVoice( string3 );
     guitar.addVoice( string4 );
     guitar.addVoice( string5 );
     guitar.addVoice( string6 );
-    tft.println("sequencer...");
+   
+    voicesampler.addVoice( string1, envelope8 );
+
+    beatsampler.addSample(36, "KICK.WAV");
+    beatsampler.addVoice(playSdRaw1, mixer3, 0, envelope1);
+
+    snaresampler.addSample(36, "SNARE.WAV");
+    snaresampler.addVoice(playSdRaw2, mixer3, 1, envelope2);
+
+    hatssampler.addSample(36, "HIHAT.WAV");
+    hatssampler.addVoice(playSdRaw3, mixer3, 2, envelope3);
+
+    basssampler.addSample(36, "BASS.WAV");
+    basssampler.addVoice(playSdRaw4, mixer3, 3, envelope4);
+
+    crashsampler.addSample(36, "CRASH.WAV");
+    crashsampler.addVoice(playSdRaw7);
+
+    for (unsigned i=0; i < sizeof(fxnames)/sizeof(fxnames[0]); i++ ) {
+        fxsampler.addSample(36+i, fxnames[i]);
+    }
+    fxsampler.addVoice(playSdRaw6, mixer7, 1);
+
+    for (unsigned i=0; i < sizeof(longfxnames)/sizeof(longfxnames[0]); i++ ) {
+        longfxsampler.addSample(36+i, longfxnames[i]);
+    }
+    longfxsampler.addVoice(playSdRaw8);
 
     beatsequencer = multisequencer.newSequencer();
     snaresequencer = multisequencer.newSequencer();
@@ -399,67 +434,21 @@ void setup() {
     guitarsequencer = multisequencer.newSequencer();
 
     beatsequencer->onevent = [] (sequencerevent *event) {
-        switch(event->channel) {
-            case 0:
-                if (event->isNoteStartEvent) {
-                    envelope1.noteOn();
-                    triggerAudioEvent(event, playSdRaw1, "KICK.WAV", mixer3, 0);
-                } else {
-                    envelope1.noteOff();
-                }
-                break;
-            default: break;
-        }
+        beatsampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
     };
 
     snaresequencer->onevent = [] (sequencerevent *event) {
-        switch(event->channel) {
-            case 0:
-                if (event->isNoteStartEvent) {
-                    envelope2.noteOn();
-                    triggerAudioEvent(event, playSdRaw2, "SNARE.WAV", mixer3, 1);
-                } else {
-                    envelope2.noteOff();
-                }
-                break;
-            default: break;
-        }
+        snaresampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
     };
 
     hatsequencer->onevent = [] (sequencerevent *event) {
-        switch(event->channel) {
-            case 0:
-                if (event->isNoteStartEvent) {
-                    envelope3.noteOn();
-                    triggerAudioEvent(event, playSdRaw3, "Hihat.WAV", mixer3, 2);
-                } else {
-                    envelope3.noteOff();
-                }
-                break;
-            default: break;
-        }
+        hatssampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
     };
 
     basssequencer->onevent = [] (sequencerevent *event) {
-        int r;
-
-        switch(event->channel) {
-            case 0:
-
-                if (event->isNoteStartEvent) {
-                    double freq = calcFrequency(event->noteNumber);
-                    sine1.frequency( freq );
-                    sine1.amplitude( event->velocity / 255.0);
-                    envelope7.noteOn();
-                    envelope4.noteOn();
-                    triggerAudioEvent(event, playSdRaw4, "BASS.WAV", mixer3, 3);
-                } else {
-                    envelope4.noteOff();
-                    envelope7.noteOff();
-                }
-
-                break;
-
+        basssampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
+    };
+    /*
             case 1:
                 r = random(10);
                 if (event->isNoteStartEvent) {
@@ -470,67 +459,26 @@ void setup() {
                 triggerAudioEvent(event, playSdRaw5, bassslidenames[r], mixer7, 0); break;
             default: break;
         }
-    };
+    */
 
     fxsequencer->onevent = [] (sequencerevent *event) {
-        int r;
-        switch(event->channel) {
-            case 0:
-                r = random(17);
-                if (event->isNoteStartEvent) {
-                    envelope6.noteOn();
-                } else {
-                    envelope6.noteOff();
-                }
-                triggerAudioEvent(event, playSdRaw6, fxnames[r], mixer7, 1); break;
-
-            default: break;
-        }
+        fxsampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
     };
 
     crashsequencer->onevent = [] (sequencerevent *event) {
-        switch(event->channel) {
-            case 0:
-                triggerAudioEvent(event, playSdRaw7, "CRASH.WAV"); break;
-            default: break;
-        }
+        crashsampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
     };
 
     longfxsequencer->onevent = [] (sequencerevent *event) {
-        int r;
-        switch(event->channel) {
-            case 0:
-                r = random(1);
-                triggerAudioEvent(event, playSdRaw8, longfxnames[r]); break;
-            default: break;
-        }
+        longfxsampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
     };
 
     voicesequencer->onevent = [] (sequencerevent *event) {
-        switch(event->channel) {
-            case 0:
-                if (event->isNoteStartEvent) {
-                    envelope8.noteOn();
-                    double rate = calcFrequency(event->noteNumber);
-                    string1.noteOn(rate, event->velocity/255.0);
-                } else {
-                    envelope8.noteOff();
-                    string1.noteOff(0.0);
-                }
-                break;
-
-            default: break;
-        }
+        voicesampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
     };
 
     guitarsequencer->onevent = [] (sequencerevent *event) {
-        //Serial.printf("Guitar: %d, on/off:%d ch:%d\n", event->noteNumber, event->isNoteStartEvent, event->channel);
-        switch(event->channel) {
-            case 0: 
-                guitar.noteEvent(event->noteNumber, event->velocity / 2.0, event->isNoteStartEvent, false);
-                break;
-            default: break;
-        }
+        guitar.noteEvent(event->noteNumber, event->velocity / 2.0, event->isNoteStartEvent, false);
     };
 
     int pattern = 0;
