@@ -17,6 +17,7 @@ Experimental multi-channel sequencer for teensy
 ## dependencies
 * [Audio library](https://github.com/PaulStoffregen/Audio)
 * [variable playback rate for teensy audio library](https://github.com/newdigate/teensy-variable-playback)
+* [polyphony](https://github.com/newdigate/teensy-polyphony) (used in examples)
 
 [![teensy-quencer on youtube](https://img.youtube.com/vi/eEeuXfxMdCI/0.jpg)](https://www.youtube.com/watch?v=eEeuXfxMdCI)
 [![youtube: 10cc - Dreadlock Holiday played on a Teensy 4.0](https://img.youtube.com/vi/XQ6LoSeZbPI/0.jpg)](https://www.youtube.com/watch?v=XQ6LoSeZbPI)
