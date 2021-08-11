@@ -92,13 +92,3 @@ midisequenceadapter adapter(multisequencer); // to read midi files into the a se
   adapter.close();
 
 ```
-
-## compiling for teensy
-You will need to add c++ std library to your compiler flags in boards.txt (Teensyduino/Java/hardware/teensy/avr/boards.txt)
-* remove -nostdlib from teensy40.build.flags.common
-* add -lstdc++ to teensy40.build.flags.cpp
-```
-teensy40.build.flags.common=-g -Wall -ffunction-sections -fdata-sections
-teensy40.build.flags.cpp=-std=gnu++14 -fno-exceptions -fpermissive -fno-rtti -fno-threadsafe-statics -felide-constructors -Wno-error=narrowing -lstdc++
-```
-
