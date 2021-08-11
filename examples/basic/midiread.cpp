@@ -8,7 +8,6 @@
 #include "midisequenceadapter.h"
 #include <USBHost_t36.h>
 
-///#include <Adafruit_GFX.h>    // Core graphics library
 #include <ST7735_t3.h> // Hardware-specific library
 #define TFT_CS   6  // CS & DC can use pins 2, 6, 9, 10, 15, 20, 21, 22, 23
 #define TFT_DC    2  //  but certain pairs must NOT be used: 2+10, 6+9, 20+23, 21+22
@@ -45,13 +44,6 @@ AudioSynthKarplusStrong  string3;        //xy=240.22222900390625,723
 AudioSynthKarplusStrong  string2;        //xy=242.33334350585938,673.6666870117188
 AudioMixer4              mixer18;        //xy=313,156
 AudioMixer4              mixer13;        //xy=334,299
-AudioEffectBitcrusher    bitcrusher6;    //xy=376,883
-AudioEffectBitcrusher    bitcrusher5;    //xy=385,825
-AudioEffectBitcrusher    bitcrusher4;    //xy=391,769
-AudioEffectBitcrusher    bitcrusher3;    //xy=394,705
-AudioEffectBitcrusher    bitcrusher2;    //xy=395,658
-AudioSynthWaveformSine   sine1;          //xy=412.00000762939453,547.2500095367432
-AudioEffectBitcrusher    bitcrusher1;    //xy=435.55550956726074,611.1111831665039
 AudioEffectEnvelope      envelope2;      //xy=577.75,194.74999713897705
 AudioMixer4              mixer17;        //xy=582,795
 AudioMixer4              mixer14;        //xy=583.6666870117188,725.7777709960938
@@ -62,7 +54,6 @@ AudioEffectEnvelope      envelope7;      //xy=592.5,547.25
 AudioEffectEnvelope      envelope1;      //xy=596.25,85.5
 AudioEffectEnvelope      envelope5;      //xy=596,417
 AudioEffectEnvelope      envelope8;      //xy=603.6110076904297,606.0914134979248
-AudioEffectFlange        flange1;        //xy=733,606
 AudioMixer4              mixer7;         //xy=793.7500038146973,371.5000066757202
 AudioMixer4              mixer3;         //xy=795.7500038146973,306.5000066757202
 AudioInputTDM            tdm1;           //xy=961.7500038146973,396.5000066757202
@@ -85,25 +76,18 @@ AudioConnection          patchCord3(playSdRaw3, 0, mixer13, 0);
 AudioConnection          patchCord4(string1, 0, mixer19, 0);
 AudioConnection          patchCord5(playSdRaw2, 0, mixer18, 1);
 AudioConnection          patchCord6(filter1, 2, mixer13, 1);
-AudioConnection          patchCord7(string6, bitcrusher6);
-AudioConnection          patchCord8(string5, bitcrusher5);
-AudioConnection          patchCord9(mixer19, bitcrusher1);
-AudioConnection          patchCord10(string4, bitcrusher4);
-AudioConnection          patchCord11(string3, bitcrusher3);
-AudioConnection          patchCord12(string2, bitcrusher2);
 AudioConnection          patchCord13(mixer18, envelope2);
 AudioConnection          patchCord14(mixer13, envelope3);
-AudioConnection          patchCord15(bitcrusher6, 0, mixer17, 0);
-AudioConnection          patchCord16(bitcrusher5, 0, mixer14, 3);
-AudioConnection          patchCord17(bitcrusher4, 0, mixer14, 2);
-AudioConnection          patchCord18(bitcrusher3, 0, mixer14, 1);
-AudioConnection          patchCord19(bitcrusher2, 0, mixer14, 0);
+AudioConnection          patchCord15(string6, 0, mixer17, 0);
+AudioConnection          patchCord16(string5, 0, mixer14, 3);
+AudioConnection          patchCord17(string4, 0, mixer14, 2);
+AudioConnection          patchCord18(string3, 0, mixer14, 1);
+AudioConnection          patchCord19(string2, 0, mixer14, 0);
 AudioConnection          patchCord20(playSdRaw6, 0, envelope6, 0);
-AudioConnection          patchCord21(sine1, envelope7);
 AudioConnection          patchCord22(playSdRaw1, 0, envelope1, 0);
 AudioConnection          patchCord23(playSdRaw4, 0, envelope4, 0);
 AudioConnection          patchCord24(playSdRaw5, 0, envelope5, 0);
-AudioConnection          patchCord25(bitcrusher1, envelope8);
+AudioConnection          patchCord25(mixer19, envelope8);
 AudioConnection          patchCord26(envelope2, 0, mixer3, 1);
 AudioConnection          patchCord27(mixer17, 0, mixer15, 3);
 AudioConnection          patchCord28(mixer17, 0, mixer16, 2);
@@ -112,12 +96,9 @@ AudioConnection          patchCord30(mixer14, 0, mixer2, 2);
 AudioConnection          patchCord31(envelope3, 0, mixer3, 2);
 AudioConnection          patchCord32(envelope4, 0, mixer3, 3);
 AudioConnection          patchCord33(envelope6, 0, mixer7, 1);
-AudioConnection          patchCord34(envelope7, 0, mixer7, 2);
 AudioConnection          patchCord35(envelope1, 0, mixer3, 0);
 AudioConnection          patchCord36(envelope5, 0, mixer7, 0);
-AudioConnection          patchCord37(envelope8, flange1);
-AudioConnection          patchCord38(flange1, 0, mixer16, 3);
-AudioConnection          patchCord39(flange1, 0, mixer1, 3);
+AudioConnection          patchCord39(envelope8, 0, mixer1, 3);
 AudioConnection          patchCord40(playSdRaw7, 0, mixer15, 0);
 AudioConnection          patchCord41(playSdRaw7, 1, mixer16, 0);
 AudioConnection          patchCord42(playSdRaw8, 0, mixer15, 1);
@@ -180,70 +161,9 @@ sequencer *longfxsequencer;
 sequencer *voicesequencer;
 sequencer *guitarsequencer;
 
-// Number of samples in each delay line
-#define FLANGE_DELAY_LENGTH (6*AUDIO_BLOCK_SAMPLES)
-short delayline[FLANGE_DELAY_LENGTH];
-
-int s_idx = FLANGE_DELAY_LENGTH/4;
-int s_depth = FLANGE_DELAY_LENGTH/4;
-double s_freq = 0.25;
-
-double calcPitchFactor(uint8_t note) {
-    double result = pow(2.0, (note-36) / 12.0);
-    return result;
-}
-
-double calcFrequency(uint8_t note) {
-    double result = 440.0 * pow(2.0, (note-69) / 12.0);
-    return result;
-}
-
 char *longfxnames[2] = {"LONGFX01.wav", "LONGFX02.wav"};
 char *fxnames[18] = {"FX01.wav", "FX02.wav", "FX03.wav", "FX04.wav", "FX05.wav", "FX06.wav", "FX07.wav", "FX09.wav","FX10.wav", "FX21.wav", "FX28.wav","FX30.wav","FX34.wav","FX35.wav","FX40.wav","FX77.wav", "HIT1.wav", "HIT2.wav"};
 char *bassslidenames[11] = {"BASSSL01.wav", "BASSSL02.wav","BASSSL03.wav","BASSSL04.wav", "BASSSL05.wav", "BASSSL06.wav","BASSSL07.wav","BASSSL08.wav","BASSSL09.wav","BASSSL10.wav","BASSSL11.wav"};
-
-void playSample(AudioPlaySdResmp &audio, char *s, double rate) {
-    if (audio.isPlaying())
-        audio.stop();
-    audio.setPlaybackRate(rate);
-    audio.playWav(s);
-}
-
-void stopSample(AudioPlaySdResmp &audio) {
-    if (audio.isPlaying())
-        audio.stop();
-}
-
-void triggerAudioEvent(sequencerevent *event, AudioPlaySdResmp &audio, char *filename, AudioMixer4 &mixer, unsigned char mixerChannel) {
-    if (event->isNoteStartEvent) {
-        double rate = calcPitchFactor(event->noteNumber);
-        mixer.gain(mixerChannel, event->velocity/128.0);
-        playSample(audio, filename, rate);
-    } else
-        stopSample(audio);
-}
-
-
-
-
-void playSample(AudioPlaySdWav &audio, String s) {
-    if (audio.isPlaying())
-        audio.stop();
-    audio.play(s.c_str());
-}
-
-void stopSample(AudioPlaySdWav &audio) {
-    if (audio.isPlaying())
-        audio.stop();
-}
-
-void triggerAudioEvent(sequencerevent *event, AudioPlaySdWav &audio, String filename) {
-    if (event->isNoteStartEvent) {
-        playSample(audio, filename);
-    } else
-        stopSample(audio);
-}
-
 
 void myNoteOn(byte channel, byte note, byte velocity) {
     // When a USB device with multiple virtual cables is used,
@@ -320,9 +240,6 @@ void printusage() {
     Serial.printf("3: effects(0..1)\n");
     Serial.printf("\t\t0:off\t\t1:fx\n");
 }
-
-
-uint8_t polyphony = 0;
 
 void setup() {
     AudioNoInterrupts();  // disable audio library momentarily
@@ -562,8 +479,6 @@ void setup() {
     guitarsequencer->setNextPattern(pattern);
 
     tft.println("fx params...");
-    sine1.frequency(440);
-    sine1.amplitude(0.4);
     envelope1.delay(0);
 
     envelope2.delay(0);
@@ -584,18 +499,8 @@ void setup() {
     envelope7.delay(0);
     envelope8.delay(0);
 
-    bitcrusher1.bits(16);
-    bitcrusher2.bits(16);
-    bitcrusher3.bits(16);
-    bitcrusher4.bits(16);
-    bitcrusher5.bits(16);
-    bitcrusher6.bits(16);
-
     noise1.amplitude(0.8);
     filter1.frequency(9000);
-
-    flange1.begin(delayline,FLANGE_DELAY_LENGTH,s_idx,s_depth,s_freq);
-    flange1.voices(s_idx,s_depth,s_freq);
 
     tft.fillScreen(ST7735_BLACK);
     tft.println("multisequencer start...");
