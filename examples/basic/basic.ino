@@ -3,11 +3,8 @@
 #include <SD.h>
 #include <TeensyVariablePlayback.h>
 #include <TeensyPolyphony.h>
-#include "sequencer.h"
-#include "tempo.h"
-#include "midisequenceadapter.h"
+#include <Teensyquencer.h>
 #include <USBHost_t36.h>
-
 #include <ST7735_t3.h> // Hardware-specific library
 #define TFT_CS   6  // CS & DC can use pins 2, 6, 9, 10, 15, 20, 21, 22, 23
 #define TFT_DC    2  //  but certain pairs must NOT be used: 2+10, 6+9, 20+23, 21+22
@@ -17,10 +14,11 @@ ST7735_t3 tft = ST7735_t3(TFT_CS, TFT_DC, TFT_RST);
 USBHost myusb;
 USBHub hub1(myusb);
 MIDIDevice midi1(myusb);
+using namespace newdigate;
 
-tempo tempo(100.0f);
-multisequencer multisequencer(tempo);
-midisequenceadapter adapter(multisequencer);
+tempo songtempo(100.0f);
+multisequencer multiseq(songtempo);
+midisequenceadapter adapter(multiseq);
 
 #pragma region audio graph
 
@@ -202,7 +200,7 @@ void myControlChange(byte channel, byte control, byte value) {
         double newBPM = 100.0f + value/2.0f;
         Serial.printf("BPM: %f\n",newBPM);
 
-        tempo.setBeatsPerMinute(newBPM);
+        songtempo.setBeatsPerMinute(newBPM);
 
     }
 }
@@ -273,12 +271,12 @@ void setup() {
     tft.setCursor(0,0);
     tft.println("connected to APC40...");
 
-    // turn off all leds on the akai AP40
+    // turn off all leds on the akai APC40
     for (int j=0; j<8;j++)
         for (int i=0; i<5;i++)
             midi1.sendNoteOff(53+i, 0, j+1);
 
-    multisequencer.onloopchange = [&] (long channel, long pattern) {
+    multiseq.onloopchange = [&] (long channel, long pattern) {
         Serial.printf("channel %d, pattern changed to %d\n", channel, pattern);
         for (int i=0; i<5;i++)
             midi1.sendNoteOff(53+i, 0, channel+1);
@@ -321,15 +319,15 @@ void setup() {
     }
     longfxsampler.addVoice(playSdWavLongFx);
 
-    kicksequencer = multisequencer.newSequencer();
-    snaresequencer = multisequencer.newSequencer();
-    hatsequencer = multisequencer.newSequencer();
-    basssequencer = multisequencer.newSequencer();
-    fxsequencer = multisequencer.newSequencer();
-    crashsequencer = multisequencer.newSequencer();
-    longfxsequencer = multisequencer.newSequencer();
-    voicesequencer = multisequencer.newSequencer();
-    guitarsequencer = multisequencer.newSequencer();
+    kicksequencer = multiseq.newSequencer();
+    snaresequencer = multiseq.newSequencer();
+    hatsequencer = multiseq.newSequencer();
+    basssequencer = multiseq.newSequencer();
+    fxsequencer = multiseq.newSequencer();
+    crashsequencer = multiseq.newSequencer();
+    longfxsequencer = multiseq.newSequencer();
+    voicesequencer = multiseq.newSequencer();
+    guitarsequencer = multiseq.newSequencer();
 
     kicksequencer->onevent = [] (sequencerevent *event) {
         kicksampler.noteEvent(event->noteNumber, event->velocity, event->isNoteStartEvent, false);
@@ -367,89 +365,48 @@ void setup() {
         guitar.noteEvent(event->noteNumber, event->velocity / 2.0, event->isNoteStartEvent, false);
     };
 
-    int pattern = 0;
+    pattern *pattern = nullptr;
 
-    tft.println("kicksequencer...");
     // kicksequencer
     pattern = kicksequencer->addPattern(4); // no beat
-
-    pattern++;
-    adapter.loadMidi("kik.mid");
-    adapter.loadMidifileToNextPattern(kicksequencer, 0, 128, 1);  // multicequencer channel number, midi track number, 8 bars long
-    adapter.close();
+    pattern = adapter.loadMidifileToNextPattern("kik.mid", kicksequencer, 0, 128, 1);  // multicequencer channel number, midi track number, 8 bars long
     kicksequencer->setNextPattern(pattern);
 
-    tft.println("snaresequencer...");
     // snaresequencer
-    
     pattern = snaresequencer->addPattern(4); // no beat 4 bars
+    pattern = adapter.loadMidifileToNextPattern("snare.mid", snaresequencer, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
+    snaresequencer->setNextPattern(pattern);
 
-    pattern++;
-    adapter.loadMidi("snare.mid");
-    adapter.loadMidifileToNextPattern(snaresequencer, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
-    adapter.close();
-
-    tft.println("hatssequencer..");
     // hatsequencer
-    
     pattern = hatsequencer->addPattern(4); // no hats
-
-    pattern++;
-    adapter.loadMidi("hihat.mid");
-    adapter.loadMidifileToNextPattern(hatsequencer, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
-    adapter.close();
+    pattern = adapter.loadMidifileToNextPattern("hihat.mid", hatsequencer, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
     hatsequencer->setNextPattern(pattern);
 
-    tft.println("basssequencer..");
     // basssequencer
-    
     pattern = basssequencer->addPattern(4); // no bass
-
-    pattern++;
-    adapter.loadMidi("dredbass.mid");
-    adapter.loadMidifileToNextPattern(basssequencer, 0, 128, 0);
-    adapter.close();
+    pattern = adapter.loadMidifileToNextPattern("dredbass.mid", basssequencer, 0, 128, 0);
     basssequencer->setNextPattern(pattern);
 
-    tft.println("fxsequencer..");
-    //fxsequencer
-    
+    // fxsequencer
     pattern = fxsequencer->addPattern(4); // no fx
 
-    tft.println("crashsequencer..");
     //crashsequencer
-    
     pattern = crashsequencer->addPattern(8); // no crash
 
     //longfxsequencer
-    
     pattern = longfxsequencer->addPattern(8); // no long fx
 
-    tft.println("voicesequencer..");
     //voicesequencer
-    
     pattern = voicesequencer->addPattern(4); // no long fx
-
-    pattern++;
-    adapter.loadMidi("guitar.mid");
-    adapter.loadMidifileToNextPattern(voicesequencer, 0, 128, 0);
-    adapter.close();
+    pattern = adapter.loadMidifileToNextPattern("guitar.mid", voicesequencer, 0, 128, 0);
     voicesequencer->setNextPattern(pattern);
 
-    tft.println("guitar-sequencer...t1");
-    //guitar-esequencer
-    
+    //guitar-sequencer
     pattern = guitarsequencer->addPattern(4); // no long fx
-
-    pattern++;
-    adapter.loadMidi("guitar2.mid");
-    adapter.loadMidifileToNextPattern(guitarsequencer, 0, 128, 0);
-    adapter.close();
+    pattern = adapter.loadMidifileToNextPattern("guitar2.mid", guitarsequencer, 0, 128, 0);
     guitarsequencer->setNextPattern(pattern);
 
-    tft.println("fx params...");
     envelopeKick.delay(0);
-
     envelopeSnare.delay(0);
     envelopeSnare.attack(0);
     envelopeSnare.hold(0);
@@ -467,13 +424,11 @@ void setup() {
     envelopeFx.delay(0);
     envelope8.delay(0);
 
-
     tft.fillScreen(ST7735_BLACK);
     tft.println("multisequencer start...");
-    multisequencer.start(micros());
+    multiseq.start(micros());
     printusage();
     AudioInterrupts();
-    tft.println("AudioInterrupts()");
 }
 
 String inputChannel="", inString = "";
@@ -505,7 +460,7 @@ void loop() {
     }
 
     // put your main code here, to run repeatedly:
-    multisequencer.tick(micros());
+    multiseq.tick(micros());
 
 
     while (Serial.available()) {

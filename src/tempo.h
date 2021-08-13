@@ -5,7 +5,7 @@
 #ifndef TEENSYSEQUENCER_TEMPO_H
 #define TEENSYSEQUENCER_TEMPO_H
 
-
+namespace newdigate {
 struct tempo {
     unsigned long _microseconds_per_tick = 0;
     double _beats_per_minute = 140.0;
@@ -30,6 +30,6 @@ struct tempo {
         return micros_per_tick;
     }
 };
-
+}
 
 #endif //TEENSYSEQUENCER_TEMPO_H
