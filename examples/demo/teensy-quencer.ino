@@ -4,15 +4,8 @@
 #include <SD.h>
 #include <TeensyVariablePlayback.h>
 #include <TeensyPolyphony.h>
-#include "sequencer.h"
-#include "songposition.h"
-#include "tempo.h"
-#include "looptype.h"
-#include "midireader.h"
-#include "midisequenceadapter.h"
-
+#include <Teensyquencer.h>
 #include <USBHost_t36.h>
-
 #include <ST7735_t3.h> // Hardware-specific library
 #define TFT_CS   6  // CS & DC can use pins 2, 6, 9, 10, 15, 20, 21, 22, 23
 #define TFT_DC    2  //  but certain pairs must NOT be used: 2+10, 6+9, 20+23, 21+22
@@ -23,9 +16,11 @@ USBHost myusb;
 USBHub hub1(myusb);
 MIDIDevice midi1(myusb);
 
-tempo tempo(100.0f);
-multisequencer multisequencer(tempo);
-midisequenceadapter adapter(multisequencer);
+using namespace newdigate;
+
+tempo songtempo(100.0f);
+multisequencer multiseq(songtempo);
+midisequenceadapter adapter(multiseq);
 
 sequencer *guitar1sequencer;
 sequencer *guitar2sequencer;
@@ -82,7 +77,7 @@ AudioMixer4              mixer4b;         //xy=596,559
 AudioMixer4              mixer2;         //xy=602,176
 AudioMixer4              mixer1;         //xy=603,77
 AudioMixer4              mixer4a;         //xy=616,414
-AudioMixer4              mixer10;         //xy=783.75,191.5
+AudioMixer4              mixerRight3;         //xy=783.75,191.5
 AudioMixer4              mixerL;         //xy=958.75,194.5
 AudioMixer4              mixerR;         //xy=960.75,376.5
 AudioOutputTDM           tdmOUT;           //xy=1156.75,292.5
@@ -112,15 +107,15 @@ AudioConnection          patchCord23(envelope2a, 0, mixer2, 0);
 AudioConnection          patchCord24(envelope2b, 0, mixer2, 1);
 AudioConnection          patchCord25(envelope1a, 0, mixer1, 0);
 AudioConnection          patchCord26(envelope1b, 0, mixer1, 1);
-AudioConnection          patchCord27(mixer3, 0, mixer10, 2);
+AudioConnection          patchCord27(mixer3, 0, mixerRight3, 2);
 AudioConnection          patchCord28(mixer4b, 0, mixerL, 2);
 AudioConnection          patchCord29(mixer4b, 0, mixerR, 2);
-AudioConnection          patchCord30(mixer2, 0, mixer10, 1);
-AudioConnection          patchCord31(mixer1, 0, mixer10, 0);
+AudioConnection          patchCord30(mixer2, 0, mixerRight3, 1);
+AudioConnection          patchCord31(mixer1, 0, mixerRight3, 0);
 AudioConnection          patchCord32(mixer4a, 0, mixerL, 1);
 AudioConnection          patchCord33(mixer4a, 0, mixerR, 1);
-AudioConnection          patchCord34(mixer10, 0, mixerL, 0);
-AudioConnection          patchCord35(mixer10, 0, mixerR, 0);
+AudioConnection          patchCord34(mixerRight3, 0, mixerL, 0);
+AudioConnection          patchCord35(mixerRight3, 0, mixerR, 0);
 AudioConnection          patchCord36(mixerL, 0, tdmOUT, 0);
 AudioConnection          patchCord37(mixerL, 0, tdmOUT, 4);
 AudioConnection          patchCord38(mixerL, 0, tdmOUT, 8);
@@ -212,7 +207,7 @@ void setup() {
     for (int i=0; i<5;i++)
       midi1.sendNoteOff(53+i, 0, j+1);
 
-  multisequencer.onloopchange = [&] (long channel, long pattern) {
+  multiseq.onloopchange = [&] (long channel, long pattern) {
     Serial.printf("channel %d, pattern changed to %d\n", channel, pattern);
     for (int i=0; i<5;i++)
       midi1.sendNoteOff(53+i, 0, channel+1);
@@ -238,10 +233,10 @@ void setup() {
 
   tft.println("sequencer..."); 
   
-  guitar1sequencer = multisequencer.newSequencer();
-  guitar2sequencer = multisequencer.newSequencer();
-  guitar3sequencer = multisequencer.newSequencer();
-  guitar4sequencer = multisequencer.newSequencer();
+  guitar1sequencer = multiseq.newSequencer();
+  guitar2sequencer = multiseq.newSequencer();
+  guitar3sequencer = multiseq.newSequencer();
+  guitar4sequencer = multiseq.newSequencer();
   
   guitar1sequencer->onevent = [] (sequencerevent *event) { sequenceGuitarEvent(event, guitar1, pianoDisplay1a, pianoDisplay1b);  };
   guitar2sequencer->onevent = [] (sequencerevent *event) { sequenceGuitarEvent(event, guitar2, pianoDisplay2a, pianoDisplay2b);  };
@@ -253,45 +248,29 @@ void setup() {
   guitar3sequencer->onloopend = [] (sequencer *sequencer, int pattern) { guitar3.turnOffAllNotesStillPlaying(); };
   guitar4sequencer->onloopend = [] (sequencer *sequencer, int pattern) { guitar4.turnOffAllNotesStillPlaying(); };
 
-  int pattern = 0;
-  int currentChannel = 0;
-
-  sequencer *tempoSequencer = multisequencer.getTempoSequencer();
+  pattern *pattern = nullptr;
+  sequencer *tempoSequencer = multiseq.getTempoSequencer();
   
-  adapter.loadMidi("innuendo.mid");
-  adapter.loadMidiTempoTrack(0, 0, 42, 4); // track 0, 42 * 4 beats, offset by 4 bars
+  adapter.loadMidiTempoTrack("innuendo.mid", 0, 0, 42, 4); // track 0, 42 * 4 beats, offset by 4 bars
   
   // guitar 1 sequencer
   pattern = guitar1sequencer->addPattern(4); // no beat
-
-  pattern++;
-  adapter.loadMidi("innuendo.mid");
-  adapter.loadMidifile(guitar1sequencer, 1, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
+  pattern = adapter.loadMidifileToNextPattern("innuendo.mid", guitar1sequencer, 1, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar1sequencer->setNextPattern(pattern);
   
   // guitar 2 sequencer
-  currentChannel++;
   pattern = guitar2sequencer->addPattern(4); // no beat 4 bars
-  
-  pattern++;
-  adapter.loadMidifileToNextPattern(guitar2sequencer, 2, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
+  pattern = adapter.loadMidifileToNextPattern("innuendo.mid", guitar2sequencer, 2, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar2sequencer->setNextPattern(pattern);
   
   // guitar 3 sequencer
-  currentChannel++;
   pattern = guitar3sequencer->addPattern(4); // no hats
-
-  pattern++;
-  adapter.loadMidifileToNextPattern(guitar3sequencer, 3, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
+  pattern = adapter.loadMidifileToNextPattern("innuendo.mid", guitar3sequencer, 3, 42, 0);  // multicequencer channel number, midi track number, 35 bars long
   guitar3sequencer->setNextPattern(pattern);
 
   // guitar 4 sequencer
-  currentChannel++;
-  pattern = guitar4sequencer->addPattern(4); // no bass
-
-  pattern++;
-  adapter.loadMidifileToNextPattern(guitar4sequencer, 4, 42, 0);
-  adapter.close();
+  pattern = guitar4sequencer->addPattern(4); // add pattern of 4 bars with no notes
+  pattern = adapter.loadMidifileToNextPattern("innuendo.mid", guitar4sequencer, 4, 42, 0);
   guitar4sequencer->setNextPattern(pattern);
 
   envelope1a.delay(0);
@@ -321,7 +300,7 @@ void setup() {
   mixer4b.gain(2, 1.0 / 2.0);
 
   tft.fillScreen(ST7735_BLACK);
-  multisequencer.start(micros());
+  multiseq.start(micros());
   AudioInterrupts();     
 }
 
@@ -374,7 +353,7 @@ void loop() {
   }
   
   // put your main code here, to run repeatedly:
-  multisequencer.tick(micros());
+  multiseq.tick(micros());
   
 }
 
@@ -429,7 +408,7 @@ void myControlChange(byte channel, byte control, byte value) {
     newBPM = 100.0f + value/2.0f;
     Serial.printf("BPM: %f\n",newBPM);
     
-    tempo.setBeatsPerMinute(newBPM);
+    songtempo.setBeatsPerMinute(newBPM);
   } else if (( 16 <= control) && ( control <= 23)) {
     if (currentSelectedTrack != channel - 1) {
       currentSelectedTrack = channel - 1;

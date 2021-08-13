@@ -10,7 +10,7 @@
 #include <math.h>
 
 using namespace std;
-
+using namespace newdigate;
 
 void first_test();
 void second_test();
@@ -47,9 +47,9 @@ void midisequenceadapter_test() {
 
     midisequenceadapter adapter(multisequencer);
     adapter.loadMidi("blah.mid");
-    adapter.loadMidifileToChannelNumber(0, 4, 420);
+    pattern* pat = adapter.loadMidifileToChannelNumber(0, 4, 420);
 
-    //sequencer->writescore(0);
+    sequencer1->writenoteslist(0);
 }
 
 void first_test() {
