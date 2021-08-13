@@ -46,8 +46,7 @@ void midisequenceadapter_test() {
     sequencer *sequencer4 = multisequencer.newSequencer();
 
     midisequenceadapter adapter(multisequencer);
-    adapter.loadMidi("blah.mid");
-    pattern* pat = adapter.loadMidifileToChannelNumber(0, 4, 420);
+    pattern* pat = adapter.loadMidifileToChannelNumber("blah.mid", 0, 4, 420);
 
     sequencer1->writenoteslist(0);
 }
