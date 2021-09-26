@@ -186,6 +186,30 @@ namespace newdigate {
                 setNextPattern(index);
         }
 
+        void readPattern(const char* row, uint8_t channel, uint8_t noteNumber) {
+            pattern *result = new pattern();
+            result->_loop_duration_bars = strlen(row) / 4;
+
+            int index = 0;
+            while (row[index] != 0) {
+                int notelength = 0;
+                switch (row[index]) {
+                case 'x' : notelength = 60; break; 
+                case 'X' : notelength = 120; break;
+                case 'B' : notelength = 240; break;
+                case 'C' : notelength = 360; break;             
+                case 'd' : notelength = 480; break;        
+                default:
+                    break;
+                }
+
+                if (notelength > 0)
+                    result->addelement(index * 120, notelength, channel, noteNumber);
+                
+                index++;
+            }
+        }
+
     private:
         tempo &_tempo;
         songposition *_position;
