@@ -70,13 +70,11 @@ midisequenceadapter adapter(multisequencer); // to read midi files into the a se
   // sequencer1
   int pattern = sequencer1->addPattern(4); // empty pattern: 4 bars;
   
-  pattern = sequencer1->addPattern(4); // kick solo 4 x 4: 4 bars
-  readPattern(0, pattern, pattern4x4, sequencer); //kick
-
-  pattern = sequencer1->addPattern(4); // kick solo 4 x 4 + snare: 4 bars;
-  readPattern(0, pattern, pattern4x4, sequencer); //kick
-  readPattern(1, pattern, patternSnr, sequencer); //snare
+  pattern = sequencer1->addPattern(4);     // empty pattern: 4 bars;
   
+  pattern = sequencer1->readPattern(pattern4x4, 0, 54); // kick 4x4, channel 0, note 54
+  sequencer1->addPattern(pattern);
+ 
   // load 'snare.mid' smf into next pattern of sequencer1
   adapter.loadMidi("snare.mid");
   adapter.loadMidifileToNextChannelPattern(0, 0, 8);  // multisequencer channel number=0 (==sequencer1), midi track number=0, 8 bars long
