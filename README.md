@@ -68,11 +68,11 @@ midisequenceadapter adapter(multisequencer); // to read midi files into the a se
   const char* patternSnr = "....x.......x.......x.......x.......x.......x.......x.......x..."; 
 
   // sequencer1
-  int pattern = sequencer1->addPattern(4); // empty pattern: 4 bars;
+  int patNum = sequencer1->addPattern(4); // empty pattern: 4 bars;
   
-  pattern = sequencer1->addPattern(4);     // empty pattern: 4 bars;
+  patNum = sequencer1->addPattern(4);     // empty pattern: 4 bars;
   
-  pattern = sequencer1->readPattern(pattern4x4, 0, 54); // kick 4x4, channel 0, note 54
+  pattern *pattern = sequencer1->readPattern(pattern4x4, 0, 54); // kick 4x4, channel 0, note 54
   sequencer1->addPattern(pattern);
  
   // load 'snare.mid' smf into next pattern of sequencer1
@@ -82,7 +82,7 @@ midisequenceadapter adapter(multisequencer); // to read midi files into the a se
 
 
   // sequencer2
-  pattern = sequencer2->addPattern(4); // empty pattern: 4 bars;
+  patNum = sequencer2->addPattern(4); // empty pattern: 4 bars;
 
   // load 'dredbass.mid' smf into next pattern of sequencer2
   adapter.loadMidi("dredbass.mid");
