@@ -173,6 +173,11 @@ namespace newdigate {
             return result;
         }
 
+        void addPattern(pattern *p) {
+            _patterns.push_back(p);
+            _numPatterns++;            
+        }
+
         void setNextPattern(unsigned nextPattern) {
             if (nextPattern >= _numPatterns) return;
             _nextPattern = nextPattern;
