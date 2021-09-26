@@ -72,8 +72,8 @@ midisequenceadapter adapter(multisequencer); // to read midi files into the a se
   
   patNum = sequencer1->addPattern(4);     // empty pattern: 4 bars;
   
-  pattern *pattern = sequencer1->readPattern(pattern4x4, 0, 54); // kick 4x4, channel 0, note 54
-  sequencer1->addPattern(pattern);
+  pattern *pat = sequencer1->readPattern(pattern4x4, 0, 54); // kick 4x4, channel 0, note 54
+  sequencer1->addPattern(pat);
  
   // load 'snare.mid' smf into next pattern of sequencer1
   adapter.loadMidi("snare.mid");
