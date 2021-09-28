@@ -191,7 +191,7 @@ namespace newdigate {
                 setNextPattern(index);
         }
 
-        void readPattern(const char* row, uint8_t channel, uint8_t noteNumber) {
+        pattern* readPattern(const char* row, uint8_t channel, uint8_t noteNumber) {
             pattern *result = new pattern();
             result->_loop_duration_bars = strlen(row) / 4;
 
@@ -213,6 +213,8 @@ namespace newdigate {
                 
                 index++;
             }
+            addPattern(result);
+            return result;
         }
 
     private:
