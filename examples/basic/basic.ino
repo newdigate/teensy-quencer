@@ -372,10 +372,18 @@ void setup() {
     pattern = adapter.loadMidifileToNextPattern("kik.mid", kicksequencer, 0, 128, 1);  // multicequencer channel number, midi track number, 8 bars long
     kicksequencer->setNextPattern(pattern);
 
+    //                        !               !               !               !      
+    const char* pattern4x4 = "X...X...X...X...X...X...X...X...X...X...X...X...X...X...X...X..."; 
+    pattern = kicksequencer->readPattern(pattern4x4, 0, 54); // kick 4x4, channel 0, note 54
+
     // snaresequencer
     pattern = snaresequencer->addPattern(4); // no beat 4 bars
     pattern = adapter.loadMidifileToNextPattern("snare.mid", snaresequencer, 0, 8, -24);  // multicequencer channel number, midi track number, 8 bars long
     snaresequencer->setNextPattern(pattern);
+
+    //                        !               !               !               !      
+    const char* patternSnr = "....x.......x.......x.......x.......x.......x.......x.......x..."; 
+    pattern = snaresequencer->readPattern(patternSnr, 0, 54); // kick 4x4, channel 0, note 54
 
     // hatsequencer
     pattern = hatsequencer->addPattern(4); // no hats
