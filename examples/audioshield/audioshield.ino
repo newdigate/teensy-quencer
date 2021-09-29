@@ -1,5 +1,4 @@
 #include <Audio.h>
-#include <SPI.h>
 #include <SD.h>
 #include <Teensyquencer.h>
 
@@ -9,8 +8,6 @@ tempo songtempo(100.0f);
 multisequencer multiseq(songtempo);
 midisequenceadapter adapter(multiseq);
 
-#pragma region audio graph
-
 // GUItool: begin automatically generated code
 AudioPlaySdWav           playSdWavKick;  //xy=994.2857055664062,490
 AudioPlaySdWav           playSdWavSnare; //xy=1010.2857055664062,545
@@ -19,8 +16,6 @@ AudioConnection          patchCord1(playSdWavKick, 0, i2s1, 0);
 AudioConnection          patchCord2(playSdWavSnare, 0, i2s1, 1);
 AudioControlSGTL5000     sgtl5000;     //xy=1235.7142791748047,641.4285697937012
 // GUItool: end automatically generated code
-
-#pragma endregion
 
 sequencer *kicksequencer;
 sequencer *snaresequencer;
@@ -93,6 +88,3 @@ void loop() {
         }
     }
 }
-
-unsigned __exidx_start;
-unsigned __exidx_end;
