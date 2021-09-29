@@ -142,8 +142,8 @@ sequencer *longfxsequencer;
 sequencer *voicesequencer;
 sequencer *guitarsequencer;
 
-char *longfxnames[2] = {"LONGFX01.wav", "LONGFX02.wav"};
-char *fxnames[18] = {"FX01.wav", "FX02.wav", "FX03.wav", "FX04.wav", "FX05.wav", "FX06.wav", "FX07.wav", "FX09.wav","FX10.wav", "FX21.wav", "FX28.wav","FX30.wav","FX34.wav","FX35.wav","FX40.wav","FX77.wav", "HIT1.wav", "HIT2.wav"};
+const char *longfxnames[2] = {"LONGFX01.wav", "LONGFX02.wav"};
+const char *fxnames[18] = {"FX01.wav", "FX02.wav", "FX03.wav", "FX04.wav", "FX05.wav", "FX06.wav", "FX07.wav", "FX09.wav","FX10.wav", "FX21.wav", "FX28.wav","FX30.wav","FX34.wav","FX35.wav","FX40.wav","FX77.wav", "HIT1.wav", "HIT2.wav"};
 
 void myNoteOn(byte channel, byte note, byte velocity) {
     // When a USB device with multiple virtual cables is used,
