@@ -14,9 +14,7 @@
 #include <functional>
 #include <algorithm>
 
-using namespace std;
-
-namespace newdigate { 
+namespace newdigate {
 
     struct sequencerevent {
         uint8_t channel = 0;
@@ -34,7 +32,7 @@ namespace newdigate {
 
     struct pattern {
         unsigned _loop_duration_bars = 0;
-        vector <sequencerevent*> _sorted_events;
+        std::vector <sequencerevent*> _sorted_events;
 
         void addelement(unsigned startTick, unsigned length, uint8_t channel, uint8_t noteNumber) {
             sequencerevent *start = new sequencerevent();
@@ -58,7 +56,7 @@ namespace newdigate {
 
         // this method needs to be called if notes are not added in order
         void sortEvents(unsigned pattern) {
-            multiset<sequencerevent*, sequencerevent> eventsForPattern;
+            std::multiset<sequencerevent*, sequencerevent> eventsForPattern;
             eventsForPattern.insert(_sorted_events.begin(), _sorted_events.end());
 
             _sorted_events.clear();
@@ -110,8 +108,8 @@ namespace newdigate {
                     _position->totalTicks %= 480 * 4 * _patterns[_currentPattern]->_loop_duration_bars;
                     wrapped = true;
                 }
-            
-                vector<sequencerevent*> &sortedEventsForPattern = _patterns[_currentPattern]->_sorted_events;
+
+                std::vector<sequencerevent*> &sortedEventsForPattern = _patterns[_currentPattern]->_sorted_events;
                 while (_last_event_index < sortedEventsForPattern.size() ) {
                     sequencerevent* c = sortedEventsForPattern[_last_event_index];
                     if ( c->position > totalTicks) {
@@ -153,7 +151,7 @@ namespace newdigate {
             if (pattern >= _numPatterns) return;
 
             Serial.printf("list events in pattern: %d\r\n", pattern);
-            vector<sequencerevent*> &sortedEventsForPatternPtr = _patterns[pattern]->_sorted_events;
+            std::vector<sequencerevent*> &sortedEventsForPatternPtr = _patterns[pattern]->_sorted_events;
 
             for (auto it = sortedEventsForPatternPtr.begin(); it != sortedEventsForPatternPtr.end(); it++)
             {
@@ -167,7 +165,7 @@ namespace newdigate {
         pattern* addPattern(unsigned numBars) {
             pattern *result = new pattern();
             result->_loop_duration_bars = numBars;
-            auto *sortedEventsForPattern = new vector<sequencerevent*>();
+            auto *sortedEventsForPattern = new std::vector<sequencerevent*>();
             _patterns.push_back(result);
             _numPatterns++;
             return result;
@@ -229,14 +227,14 @@ namespace newdigate {
         unsigned long _lastTickMicroseconds = 0;
         unsigned long _microseconds = 0;
         unsigned long _previousMicroseconds = 0;
-        vector<pattern *> _patterns;
+        std::vector<pattern *> _patterns;
         //vector<unsigned int> _loop_duration_bars;
         //vector< vector<sequencerevent*> * > _sorted_events; //store a collection of pointers to sequencerevents per pattern
 
         int _last_event_index = 0;
 
         template<class T>
-        int getIndex(vector<T> v, T K)
+        int getIndex(std::vector<T> v, T K)
         {
             auto it = find(v.begin(), v.end(), K);
             if (it != v.end())
@@ -312,7 +310,7 @@ namespace newdigate {
     private:
         tempo &_tempo;
         unsigned _numSequencers = 0;
-        vector<sequencer*> _sequencers;
+        std::vector<sequencer*> _sequencers;
         sequencer *_tempoSequencer;
         songposition *_songposition;
 
